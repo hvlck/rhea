@@ -1,0 +1,19 @@
+{
+    "name": "rhea",
+    "version": "0.0.1",
+    "description": "the micro rendering framework",
+    "main": "index.ts",
+    "repository": "https://github.com/EthanJustice/rhea",
+    "author": "EthanJustice <47954690+EthanJustice@users.noreply.github.com>",
+    "license": "GPL-3.0-or-later",
+    "scripts": {
+        "test": "jest",
+        "doc": "yarn run typedoc --out docs src"
+    },
+    "devDependencies": {
+        "@types/jest": "^26.0.20",
+        "jest": "^26.6.3",
+        "ts-jest": "^26.5.1",
+        "typescript": "^4.1.5"
+    }
+}
