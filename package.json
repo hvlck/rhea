@@ -8,7 +8,9 @@
     "license": "GPL-3.0-or-later",
     "scripts": {
         "test": "jest",
-        "doc": "yarn run typedoc --out docs src"
+        "doc": "yarn run typedoc --out docs src",
+        "watch": "tsc --watch",
+        "serve": "miniserve --index index.html ./"
     },
     "devDependencies": {
         "@types/jest": "^26.0.20",
