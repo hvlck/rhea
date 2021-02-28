@@ -4,10 +4,19 @@ import {
     ComponentEventType,
     ElementTag,
     event as e,
+    head as h,
 } from "./rt/util.js";
 import { redraw, register, registerRoute, render, s } from "./rt/index.js";
 
 const Index = () => {
+    h(
+        b(ElementTag.Title, "rhea"),
+        b(ElementTag.Link, "", {
+            href: "/dist/index.css",
+            rel: "stylesheet",
+            type: "text/css",
+        })
+    );
     const [st, set] = s("nav", { clicks: 0 });
     const nav = b(ElementTag.Nav);
     const home = b(ElementTag.A, "Home", {
@@ -59,6 +68,14 @@ registerRoute(idx, idxComponents);
 
 const About = () => {
     const nav = b(ElementTag.H1, "About");
+    h(
+        b(ElementTag.Title, "about"),
+        b(ElementTag.Link, "", {
+            href: "/dist/about.css",
+            rel: "stylesheet",
+            type: "text/css",
+        })
+    );
     return nav;
 };
 

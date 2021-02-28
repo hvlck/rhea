@@ -85,11 +85,34 @@ export enum ComponentEventType {
 
 export function event(
     el: HTMLElement,
-    evtType: ComponentEventType,
+    evtType: ComponentEventType | string,
     evt: (this: HTMLElement, ev: Event) => any
 ) {
     el.addEventListener(evtType, event => {
         evt.call(el, event);
     });
     if (el.dataset.component) redraw(el.dataset.component);
+}
+
+export function head(...el: HTMLHeadElement[]) {
+    el.forEach(i => {
+        let selector = "";
+        if (i.hasAttribute("title")) {
+            selector = "title";
+        } else if (i.hasAttribute("name")) {
+            selector = "name";
+        } else if (i.hasAttribute("href")) {
+            selector = "href";
+        }
+
+        let attr = "";
+        if (selector.length >= 1) {
+            attr = `[${selector}="${i.getAttribute(selector)}"]`;
+        }
+
+        document.head
+            .querySelector(`${i.nodeName.toLowerCase()}${attr}`)
+            ?.remove();
+        document.head.appendChild(i);
+    });
 }
