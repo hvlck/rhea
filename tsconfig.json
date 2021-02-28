@@ -69,8 +69,8 @@
     },
     "files": [
         "./src/index.ts",
-        "./src/experimental/index.ts",
-        "./src/experimental/component.ts",
-        "./src/experimental/util.ts"
+        "./src/rt/index.ts",
+        "./src/component.ts",
+        "./src/rt/util.ts"
     ]
 }

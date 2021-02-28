@@ -1,3 +1,5 @@
+import { EventType, redraw } from "./index.js";
+
 /**
  * A restrictive method of generating HTML elements for the b() function
  */
@@ -73,4 +75,19 @@ export function b(
 export function a(parent: HTMLElement, children: HTMLElement[]) {
     children.forEach(i => parent.appendChild(i));
     return parent;
+}
+
+export enum ComponentEventType {
+    Click = "click",
+}
+
+export function e(
+    el: HTMLElement,
+    evtType: ComponentEventType,
+    evt: (this: HTMLElement, ev: Event) => any
+) {
+    el.addEventListener(evtType, event => {
+        evt.call(el, event);
+    });
+    if (el.dataset.component) redraw(el.dataset.component);
 }
