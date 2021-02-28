@@ -1,10 +1,5 @@
-import {
-    Component,
-    register,
-    registerRoute,
-    render,
-} from "../../src/rt/index.js";
-import { build as b, ElementTag as El } from "../../src/std/index.js";
+import { Component, register, registerRoute, render } from "../../src/rt/index";
+import { build as b, ElementTag as El } from "../../src/std/index";
 
 const Nav = () => {
     const nav = b(El.Nav);

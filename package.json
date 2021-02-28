@@ -11,7 +11,7 @@
         "doc": "yarn run typedoc --out docs src",
         "watch": "tsc --watch",
         "serve": "miniserve --index index.html ./",
-        "build": "npx esbuild ./src/experimental/index.ts --bundle --minify --sourcemap --outfile=dist/experimental/index.js --target=chrome58,firefox57,safari11,edge16 && npx esbuild ./src/experimental/component.ts --bundle --minify --sourcemap --outfile=dist/experimental/component.js --target=chrome58,firefox57,safari11,edge16"
+        "build": "node ./build.js"
     },
     "devDependencies": {
         "@types/jest": "^26.0.20",

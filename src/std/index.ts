@@ -1,6 +1,6 @@
 // standard library utilities
 
-import { redraw } from "../rt/index.js";
+import { redraw } from "../rt/index";
 
 /**
  * A restrictive method of generating HTML elements for the b() function
@@ -56,7 +56,7 @@ export enum ElementTag {
  * @param attributes - Attributes to apply to the HTML element
  */
 export function build(
-    type: ElementTag,
+    type: ElementTag | string,
     text?: string,
     attributes?: { [key: string]: string },
     children?: HTMLElement[]
@@ -67,6 +67,8 @@ export function build(
         Object.keys(attributes).forEach(item => {
             if (element.hasAttribute(item) || item in element) {
                 element.setAttribute(item, attributes[item]);
+            } else if (item == "class") {
+                element.classList.add(...attributes[item].split(" "));
             }
         });
     }

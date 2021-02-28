@@ -5,7 +5,7 @@ import {
     ElementTag,
     event as e,
     head as h,
-} from "./src/std/index.js";
+} from "./src/std/index";
 import {
     Component,
     redraw,
@@ -13,7 +13,7 @@ import {
     registerRoute,
     render,
     s,
-} from "./src/rt/index.js";
+} from "./src/rt/index";
 
 const Index = () => {
     h(
@@ -25,7 +25,7 @@ const Index = () => {
         })
     );
     const [st, set] = s("nav", { clicks: 0 });
-    const nav = b(ElementTag.Nav);
+    const nav = b(ElementTag.Nav, "", { class: "nav" });
     const home = b(ElementTag.A, "Home", {
         href: "/",
     });
