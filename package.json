@@ -3,17 +3,19 @@
     "version": "0.0.1",
     "description": "the micro rendering framework",
     "main": "index.ts",
-    "repository": "https://github.com/EthanJustice/rhea",
+    "repository": "https://github.com/hvlck/rhea",
     "author": "EthanJustice <47954690+EthanJustice@users.noreply.github.com>",
     "license": "GPL-3.0-or-later",
     "scripts": {
         "test": "jest",
         "doc": "yarn run typedoc --out docs src",
         "watch": "tsc --watch",
-        "serve": "miniserve --index index.html ./"
+        "serve": "miniserve --index index.html ./",
+        "build": "npx esbuild ./src/experimental/index.ts --bundle --minify --sourcemap --outfile=dist/experimental/index.js --target=chrome58,firefox57,safari11,edge16 && npx esbuild ./src/experimental/component.ts --bundle --minify --sourcemap --outfile=dist/experimental/component.js --target=chrome58,firefox57,safari11,edge16"
     },
     "devDependencies": {
         "@types/jest": "^26.0.20",
+        "esbuild": "^0.8.53",
         "jest": "^26.6.3",
         "ts-jest": "^26.5.1",
         "typescript": "^4.1.5"
