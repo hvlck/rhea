@@ -1,4 +1,4 @@
-import { EventType, redraw } from "./index.js";
+import { redraw } from "./index.js";
 
 /**
  * A restrictive method of generating HTML elements for the b() function
@@ -43,6 +43,8 @@ export enum ElementTag {
     I = "i",
     Template = "template",
     Slot = "slot",
+    Ul = "ul",
+    Ol = "ol",
 }
 
 /**
@@ -51,7 +53,7 @@ export enum ElementTag {
  * @param text Optional text of the HTML element
  * @param attributes - Attributes to apply to the HTML element
  */
-export function b(
+export function build(
     type: ElementTag,
     text?: string,
     attributes?: { [key: string]: string },
@@ -72,7 +74,7 @@ export function b(
     return element;
 }
 
-export function a(parent: HTMLElement, children: HTMLElement[]) {
+export function append(parent: HTMLElement, children: HTMLElement[]) {
     children.forEach(i => parent.appendChild(i));
     return parent;
 }
@@ -81,7 +83,7 @@ export enum ComponentEventType {
     Click = "click",
 }
 
-export function e(
+export function event(
     el: HTMLElement,
     evtType: ComponentEventType,
     evt: (this: HTMLElement, ev: Event) => any

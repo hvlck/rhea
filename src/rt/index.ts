@@ -1,9 +1,28 @@
 interface StateFunction {
-    set: () => void;
-    readonly state: Map<string, any>;
+    readonly component: string;
+    set: (updated: any) => void;
+    state: any;
 }
 
-//const State: Map<string, StateFunction> = new Map();
+const State: Map<string, StateFunction> = new Map();
+
+export const s = (component: string, state: any = {}) => {
+    const c = State.get(component);
+    if (c) {
+        return c;
+    } else {
+        const s = <StateFunction>{
+            component,
+            state,
+            set: function (updated: any) {
+                this.state = updated;
+                redraw(this.component);
+            },
+        };
+        State.set(component, s);
+        return s;
+    }
+};
 
 /**
  * Components is a list of unique components and the functions that generate them.
@@ -91,6 +110,8 @@ const goTo = (evt: Event, url: URL) => {
         navigate(url);
         return true;
     }
+
+    return false;
 };
 
 /**
@@ -110,8 +131,15 @@ export const render = (prev = false) => {
             emit(el, EventType.Render);
         }
     });
+
+    return true;
 };
 
+/**
+ * Generates and hydrates a given component
+ * @param i The function to generate the component from
+ * @param name Name of the component
+ */
 const r = (i: Function, name: string) => {
     const el: HTMLElement = i?.call(null);
 
@@ -136,6 +164,10 @@ const r = (i: Function, name: string) => {
     return el;
 };
 
+/**
+ * Re-renders a single component
+ * @param component The component to redraw
+ */
 export const redraw = (component: string) => {
     const el = document.body.querySelector(`*[data-component="${component}"]`);
     const cmp = Components.get(component);
