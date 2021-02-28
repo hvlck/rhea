@@ -8,51 +8,31 @@ import {
 import { redraw, register, registerRoute, render, s } from "./rt/index.js";
 
 const Index = () => {
-    const state = s("nav", { clicks: 0 });
+    const [st, set] = s("nav", { clicks: 0 });
     const nav = b(ElementTag.Nav);
     const home = b(ElementTag.A, "Home", {
         href: "/",
     });
 
     e(home, ComponentEventType.Click, () => {
-        state.set({ clicks: state.state.clicks + 1 });
+        set({ clicks: st.clicks + 1 });
         redraw("a");
     });
 
-    const t = b(ElementTag.P, "Clicks: " + state.state.clicks);
+    const t = b(ElementTag.P, "Clicks: " + st.clicks);
     const abt = b(ElementTag.A, "About", {
         href: "/about",
     });
 
-    a(nav, [home, abt, t]);
-    return nav;
+    return a(nav, [home, abt, t]);
 };
 
 const idx: Set<string> = new Set();
 idx.add("/").add("/about");
+register(Index);
 
-register("a", Index);
-
-const idxComponents: Set<string> = new Set();
-
-idxComponents.add("a");
-
-registerRoute(idx, idxComponents);
-
-const About = () => {
-    const nav = b(ElementTag.H1, "About");
-    return nav;
-};
-
-const abt: Set<string> = new Set();
-abt.add("/about");
-
-register("about", About);
-
-const abtComp: Set<string> = new Set();
-abtComp.add("a").add("about");
-
-registerRoute(abt, abtComp);
+const idxComponents: Set<Function> = new Set();
+idxComponents.add(Index);
 
 const Items = () => {
     const el = b(ElementTag.Div);
@@ -73,8 +53,21 @@ const Items = () => {
     return el;
 };
 
-register("items", Items);
+register(Items);
+idxComponents.add(Items);
+registerRoute(idx, idxComponents);
 
-idxComponents.add("items");
+const About = () => {
+    const nav = b(ElementTag.H1, "About");
+    return nav;
+};
+
+const abt: Set<string> = new Set();
+abt.add("/about");
+register(About);
+
+const abtComp: Set<Function> = new Set();
+abtComp.add(Index).add(About);
+registerRoute(abt, abtComp);
 
 window.addEventListener("load", () => render());

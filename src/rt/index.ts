@@ -9,18 +9,18 @@ const State: Map<string, StateFunction> = new Map();
 export const s = (component: string, state: any = {}) => {
     const c = State.get(component);
     if (c) {
-        return c;
+        return [c.state, c.set];
     } else {
         const s = <StateFunction>{
             component,
             state,
             set: function (updated: any) {
-                this.state = updated;
-                redraw(this.component);
+                s.state = updated;
+                redraw(s.component);
             },
         };
         State.set(component, s);
-        return s;
+        return [s.state, s.set];
     }
 };
 
@@ -53,8 +53,8 @@ window.addEventListener("popstate", () => {
  * the name with the route, e.g. `/:nav` and `/about:nav`
  * @param element The function that returns an HTMLElement
  */
-export const register = (name: string, element: Function) => {
-    Components.set(name, element);
+export const register = (element: Function) => {
+    Components.set(element.name.toLowerCase(), element);
 };
 
 /**
@@ -62,9 +62,16 @@ export const register = (name: string, element: Function) => {
  * @param paths The paths you want to register the components for
  * @param components The components you want to register on the path
  */
-export const registerRoute = (paths: Set<string>, components: Set<string>) => {
+export const registerRoute = (
+    paths: Set<string>,
+    components: Set<Function>
+) => {
+    const s = Array.from(components).map(i => i.name?.toLowerCase());
+
+    const cmp: Set<string> = new Set();
+    s.forEach(i => cmp.add(i));
     paths.forEach(i => {
-        Index.set(i, components);
+        Index.set(i, cmp);
     });
 };
 
