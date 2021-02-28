@@ -1,4 +1,6 @@
-import { redraw } from "./index.js";
+// standard library utilities
+
+import { redraw } from "../rt/index.js";
 
 /**
  * A restrictive method of generating HTML elements for the b() function
@@ -94,6 +96,10 @@ export function event(
     if (el.dataset.component) redraw(el.dataset.component);
 }
 
+/**
+ * Updates the document's `head` with the provided elements. Note that the first similar element
+ * @param el The document.head elements to update
+ */
 export function head(...el: HTMLHeadElement[]) {
     el.forEach(i => {
         let selector = "";
@@ -113,6 +119,7 @@ export function head(...el: HTMLHeadElement[]) {
         document.head
             .querySelector(`${i.nodeName.toLowerCase()}${attr}`)
             ?.remove();
+
         document.head.appendChild(i);
     });
 }

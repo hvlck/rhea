@@ -1,3 +1,6 @@
+// rhea runtime manager
+export type Component = () => HTMLElement;
+
 interface StateFunction {
     readonly component: string;
     set: (updated: any) => void;
@@ -29,7 +32,7 @@ export const s = (component: string, state: any = {}) => {
  * The key is the function name; **these should be unique**.
  * The function is the function that generates a new HTMLElement; this should be in its return value.
  */
-const Components: Map<string, Function> = new Map();
+const Components: Map<string, Component> = new Map();
 
 /**
  * Index is the index of routes (based on window.location.pathname) and the corresponding list of components that it consists of.
@@ -53,7 +56,7 @@ window.addEventListener("popstate", () => {
  * the name with the route, e.g. `/:nav` and `/about:nav`
  * @param element The function that returns an HTMLElement
  */
-export const register = (element: Function) => {
+export const register = (element: Component) => {
     Components.set(element.name.toLowerCase(), element);
 };
 
@@ -64,7 +67,7 @@ export const register = (element: Function) => {
  */
 export const registerRoute = (
     paths: Set<string>,
-    components: Set<Function>
+    components: Set<Component>
 ) => {
     const s = Array.from(components).map(i => i.name?.toLowerCase());
 
@@ -147,7 +150,7 @@ export const render = (prev = false) => {
  * @param i The function to generate the component from
  * @param name Name of the component
  */
-const r = (i: Function, name: string) => {
+const r = (i: Component, name: string) => {
     const el: HTMLElement = i?.call(null);
 
     const kids = Array.from(el.children);

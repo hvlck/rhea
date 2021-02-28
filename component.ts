@@ -5,12 +5,19 @@ import {
     ElementTag,
     event as e,
     head as h,
-} from "./rt/util.js";
-import { redraw, register, registerRoute, render, s } from "./rt/index.js";
+} from "./src/std/index.js";
+import {
+    Component,
+    redraw,
+    register,
+    registerRoute,
+    render,
+    s,
+} from "./src/rt/index.js";
 
 const Index = () => {
     h(
-        b(ElementTag.Title, "rhea"),
+        b(ElementTag.Title, "index // rhea"),
         b(ElementTag.Link, "", {
             href: "/dist/index.css",
             rel: "stylesheet",
@@ -40,7 +47,7 @@ const idx: Set<string> = new Set();
 idx.add("/").add("/about");
 register(Index);
 
-const idxComponents: Set<Function> = new Set();
+const idxComponents: Set<Component> = new Set();
 idxComponents.add(Index);
 
 const Items = () => {
@@ -69,7 +76,7 @@ registerRoute(idx, idxComponents);
 const About = () => {
     const nav = b(ElementTag.H1, "About");
     h(
-        b(ElementTag.Title, "about"),
+        b(ElementTag.Title, "about // rhea"),
         b(ElementTag.Link, "", {
             href: "/dist/about.css",
             rel: "stylesheet",
@@ -83,7 +90,7 @@ const abt: Set<string> = new Set();
 abt.add("/about");
 register(About);
 
-const abtComp: Set<Function> = new Set();
+const abtComp: Set<Component> = new Set();
 abtComp.add(Index).add(About);
 registerRoute(abt, abtComp);
 

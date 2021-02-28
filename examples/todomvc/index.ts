@@ -1,5 +1,10 @@
-import { register, registerRoute, render } from "../../src/rt/index.js";
-import { build as b, ElementTag as El } from "../../src/rt/util.js";
+import {
+    Component,
+    register,
+    registerRoute,
+    render,
+} from "../../src/rt/index.js";
+import { build as b, ElementTag as El } from "../../src/std/index.js";
 
 const Nav = () => {
     const nav = b(El.Nav);
@@ -8,17 +13,17 @@ const Nav = () => {
 };
 
 const idx = new Set<string>().add("/examples/hn/");
-register("nav", Nav);
+register(Nav);
 
-const Items = async () => {
+const Items = () => {
     const el = b(El.Ul);
     return el;
 };
 
-register("items", Items);
+register(Items);
 
-const idxComponents: Set<string> = new Set();
-idxComponents.add("nav").add("items");
+const idxComponents: Set<Component> = new Set();
+idxComponents.add(Nav).add(Items);
 
 registerRoute(idx, idxComponents);
 window.addEventListener("load", () => render());
