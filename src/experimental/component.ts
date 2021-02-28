@@ -17,7 +17,9 @@ idx.add("/");
 register("a", Index);
 
 const idxComponents: Set<string> = new Set();
+
 idxComponents.add("a");
+
 registerRoute(idx, idxComponents);
 
 window.addEventListener("load", () => render());

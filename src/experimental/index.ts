@@ -44,6 +44,13 @@ enum EventType {
 const emit = (el: HTMLElement, event: EventType, detail?: Object) =>
     el.dispatchEvent(new CustomEvent(event.toString(), { detail }));
 
+const goTo = (evt: Event, url: URL) => {
+    evt.preventDefault();
+    if (evt.defaultPrevented == true) {
+        navigate(url);
+    }
+};
+
 export const render = (prev = false) => {
     if (prev == true) removeAll(document.body.children);
     const components = Index.get(window.location.pathname);
@@ -51,13 +58,21 @@ export const render = (prev = false) => {
         const cmp = Components.get(i);
         const el: HTMLElement = cmp?.call(null);
 
+        const kids = Array.from(el.children);
+        const hasLink = kids.filter(kid => kid.nodeName == "A");
+
+        if (hasLink.length >= 1) {
+            hasLink.forEach(i =>
+                i.addEventListener("click", evt =>
+                    goTo(evt, new URL((i as HTMLAnchorElement).href))
+                )
+            );
+        }
+
         if (el.nodeName == "A") {
-            el.addEventListener("click", evt => {
-                evt.preventDefault();
-                if (evt.defaultPrevented == true) {
-                    navigate(new URL((el as HTMLAnchorElement).href));
-                }
-            });
+            el.addEventListener("click", evt =>
+                goTo(evt, new URL((el as HTMLAnchorElement).href))
+            );
         }
 
         document.body.appendChild(el);
