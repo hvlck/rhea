@@ -3,7 +3,7 @@ export type Component = () => HTMLElement;
 
 interface StateFunction {
     readonly component: string;
-    set: (updated: any) => void;
+    set: (updated: any) => any;
     state: any;
 }
 
@@ -20,6 +20,7 @@ export const s = (component: string, state: any = {}) => {
             set: function (updated: any) {
                 s.state = updated;
                 redraw(s.component);
+                return s.state;
             },
         };
         State.set(component, s);
@@ -57,7 +58,12 @@ window.addEventListener("popstate", () => {
  * @param element The function that returns an HTMLElement
  */
 export const register = (element: Component) => {
-    Components.set(element.name.toLowerCase(), element);
+    const n = element.name.toLowerCase();
+    if (Components.get(n))
+        throw Error(`component ${n} has already been defined!`);
+    else {
+        Components.set(element.name.toLowerCase(), element);
+    }
 };
 
 /**
@@ -136,7 +142,7 @@ export const render = (prev = false) => {
     components?.forEach(i => {
         const cmp = Components.get(i);
         if (cmp) {
-            const el = r(cmp, i);
+            const el = hydrate(cmp, i);
             document.body.appendChild(el);
             emit(el, EventType.Render);
         }
@@ -150,7 +156,7 @@ export const render = (prev = false) => {
  * @param i The function to generate the component from
  * @param name Name of the component
  */
-const r = (i: Component, name: string) => {
+const hydrate = (i: Component, name: string) => {
     const el: HTMLElement = i?.call(null);
 
     const kids = Array.from(el.children);
@@ -182,6 +188,6 @@ export const redraw = (component: string) => {
     const el = document.body.querySelector(`*[data-component="${component}"]`);
     const cmp = Components.get(component);
     if (el && cmp) {
-        el.replaceWith(r(cmp, component));
+        el.replaceWith(hydrate(cmp, component));
     }
 };

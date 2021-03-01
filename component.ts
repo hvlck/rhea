@@ -32,7 +32,6 @@ const Index = () => {
 
     e(home, ComponentEventType.Click, () => {
         set({ clicks: st.clicks + 1 });
-        redraw("a");
     });
 
     const t = b(ElementTag.P, "Clicks: " + st.clicks);
@@ -40,7 +39,7 @@ const Index = () => {
         href: "/about",
     });
 
-    return a(nav, [home, abt, t]);
+    return a(nav, home, abt, t);
 };
 
 const idx: Set<string> = new Set();
@@ -61,8 +60,8 @@ const Items = () => {
                 const title = b(ElementTag.P, i.title);
                 const completed = b(ElementTag.P, i.completed);
 
-                a(d, [id, title, completed]);
-                a(el, [d]);
+                a(d, id, title, completed);
+                a(el, d);
             });
         });
 

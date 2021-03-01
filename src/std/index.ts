@@ -59,7 +59,7 @@ export function build(
     type: ElementTag | string,
     text?: string,
     attributes?: { [key: string]: string },
-    children?: HTMLElement[]
+    ...children: HTMLElement[]
 ) {
     let element = document.createElement(type.toString());
     element.innerText = text || "";
@@ -78,7 +78,7 @@ export function build(
     return element;
 }
 
-export function append(parent: HTMLElement, children: HTMLElement[]) {
+export function append(parent: HTMLElement, ...children: HTMLElement[]) {
     children.forEach(i => parent.appendChild(i));
     return parent;
 }
@@ -92,9 +92,9 @@ export function event(
     evtType: ComponentEventType | string,
     evt: (this: HTMLElement, ev: Event) => any
 ) {
-    el.addEventListener(evtType, event => {
-        evt.call(el, event);
-    });
+    // todo: maybe pass state as third arg to evt.call()
+    // also maybe return the result of the call to evt.call()
+    el.addEventListener(evtType, event => evt.call(el, event));
     if (el.dataset.component) redraw(el.dataset.component);
 }
 
