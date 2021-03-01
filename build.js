@@ -3,6 +3,11 @@ require("esbuild")
         entryPoints: ["./src/index.ts"],
         bundle: true,
         outfile: "dist/index.js",
+        minify: true,
+        sourcemap: true,
+        treeShaking: true,
+        watch: true,
+        keepNames: true,
     })
     .catch(() => process.exit(1));
 
@@ -11,5 +16,10 @@ require("esbuild")
         entryPoints: ["./component.ts"],
         bundle: true,
         outfile: "dist/component.js",
+        minify: true,
+        sourcemap: true,
+        treeShaking: true,
+        watch: true,
+        keepNames: true,
     })
     .catch(() => process.exit(1));

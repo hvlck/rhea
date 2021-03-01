@@ -7,7 +7,7 @@ interface StateFunction {
     state: any;
 }
 
-const State: Map<string, StateFunction> = new Map();
+export const State: Map<string, StateFunction> = new Map();
 
 export const s = (component: string, state: any = {}) => {
     const c = State.get(component);
@@ -32,19 +32,21 @@ export const s = (component: string, state: any = {}) => {
  * Components is a list of unique components and the functions that generate them.
  * The key is the function name; **these should be unique**.
  * The function is the function that generates a new HTMLElement; this should be in its return value.
+ * It is recommended that you do not modify this directly.
  */
-const Components: Map<string, Component> = new Map();
+export const Components: Map<string, Component> = new Map();
 
 /**
  * Index is the index of routes (based on window.location.pathname) and the corresponding list of components that it consists of.
  * The key is the route, and the value is the list of components the route is made of.
+ * It is recommended that you do not modify this directly.
  */
-const Index: Map<string, Set<string>> = new Map();
+export const Index: Map<string, Set<string>> = new Map();
 
 /**
  * Re-renders items whenever the user uses the browser's forward/back buttons
  */
-window.addEventListener("popstate", () => {
+window.addEventListener("popstate", evt => {
     emit(document.body, EventType.BeforePageChange);
     render(true);
     emit(document.body, EventType.AfterPageChange);
@@ -71,6 +73,8 @@ export const register = (element: Component) => {
  * @param paths The paths you want to register the components for
  * @param components The components you want to register on the path
  */
+// maybe change return value to set, so that callers can do
+// const indexRoute = registerRoute("/home").add("Nav").add("Content").add("Footer")
 export const registerRoute = (
     paths: Set<string>,
     components: Set<Component>
@@ -86,7 +90,9 @@ export const registerRoute = (
 
 // removes all children from the given element
 const removeAll = (el: HTMLCollection) => {
-    Array.from(el).forEach(i => i.remove());
+    requestAnimationFrame(() => {
+        Array.from(el).forEach(i => i.remove());
+    });
 };
 
 /**
@@ -96,8 +102,8 @@ const removeAll = (el: HTMLCollection) => {
  * such as one from an `<a>` element.
  */
 export const navigate = (destination: URL) => {
-    removeAll(document.body.children);
-    window.history.pushState("", "", destination.pathname);
+    const p = destination.pathname;
+    window.history.pushState("", "", p);
     render(true);
 };
 
@@ -105,11 +111,13 @@ export const navigate = (destination: URL) => {
  * Note that the render event will be scoped to the element is called on, while the before/after page change events
  * are called on `document.body`
  * @param Render The render event, called whenever a page is rendered.
+ * @param GlobalRender Called on `document.body` whenever the page is changed and triggers a complete rerender.
  * @param BeforePageChange Called before a page is changed using the History API
  * @param AfterPageChange Called after a page is changed and rendered.
  */
 export enum EventType {
     Render = "render",
+    GlobalRender = "global-render",
     BeforePageChange = "before-page-change",
     AfterPageChange = "after-page-change",
 }
@@ -130,22 +138,37 @@ const goTo = (evt: Event, url: URL) => {
     return false;
 };
 
+const ra = window.requestAnimationFrame;
+window.requestAnimationFrame = (function () {
+    return (
+        ra ||
+        window.webkitRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 1000 / 60);
+        }
+    );
+})();
+
 /**
  * Renders all components.
  * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
  */
-export const render = (prev = false) => {
-    if (prev == true) removeAll(document.body.children);
+export const render = (prev = true) => {
+    if (prev) removeAll(document.body.children);
 
     const components = Index.get(window.location.pathname);
+    let c: HTMLElement[] = [];
 
     components?.forEach(i => {
         const cmp = Components.get(i);
         if (cmp) {
-            const el = hydrate(cmp, i);
-            document.body.appendChild(el);
-            emit(el, EventType.Render);
+            c.push(hydrate(cmp, i));
+            return;
         }
+    });
+    requestAnimationFrame(() => {
+        document.body.append(...c);
+        emit(document.body, EventType.GlobalRender);
     });
 
     return true;

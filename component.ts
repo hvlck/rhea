@@ -7,6 +7,7 @@ import {
     head as h,
 } from "./src/std/index";
 import {
+    Components,
     Component,
     redraw,
     register,
@@ -15,7 +16,7 @@ import {
     s,
 } from "./src/rt/index";
 
-const Index = () => {
+const Idx = () => {
     h(
         b(ElementTag.Title, "index // rhea"),
         b(ElementTag.Link, "", {
@@ -44,10 +45,10 @@ const Index = () => {
 
 const idx: Set<string> = new Set();
 idx.add("/").add("/about");
-register(Index);
+register(Idx);
 
 const idxComponents: Set<Component> = new Set();
-idxComponents.add(Index);
+idxComponents.add(Idx);
 
 const Items = () => {
     const el = b(ElementTag.Div);
@@ -90,7 +91,7 @@ abt.add("/about");
 register(About);
 
 const abtComp: Set<Component> = new Set();
-abtComp.add(Index).add(About);
+abtComp.add(Idx).add(About);
 registerRoute(abt, abtComp);
 
 window.addEventListener("load", () => render());

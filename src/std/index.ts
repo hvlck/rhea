@@ -94,6 +94,7 @@ export function event(
 ) {
     // todo: maybe pass state as third arg to evt.call()
     // also maybe return the result of the call to evt.call()
+    // return of `false` could also denote that component doesn't need to update
     el.addEventListener(evtType, event => evt.call(el, event));
     if (el.dataset.component) redraw(el.dataset.component);
 }
