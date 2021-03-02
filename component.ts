@@ -18,16 +18,17 @@ import {
 
 const Idx = () => {
     h(
-        b(ElementTag.Title, "index // rhea"),
-        b(ElementTag.Link, "", {
+        b(ElementTag.Title, { text: "index // rhea" }),
+        b(ElementTag.Link, {
             href: "/dist/index.css",
             rel: "stylesheet",
             type: "text/css",
         })
     );
     const [st, set] = s("nav", { clicks: 0 });
-    const nav = b(ElementTag.Nav, "", { class: "nav" });
-    const home = b(ElementTag.A, "Home", {
+    const nav = b(ElementTag.Nav, { class: "nav" });
+    const home = b(ElementTag.A, {
+        text: "Home",
         href: "/",
     });
 
@@ -35,12 +36,14 @@ const Idx = () => {
         set({ clicks: st.clicks + 1 });
     });
 
-    const t = b(ElementTag.P, "Clicks: " + st.clicks);
-    const abt = b(ElementTag.A, "About", {
+    const t = b(ElementTag.P, { text: "Clicks: " + st.clicks });
+    const abt = b(ElementTag.A, {
+        text: "About",
         href: "/about",
     });
 
-    const p = b(ElementTag.A, "Page", {
+    const p = b(ElementTag.A, {
+        text: "Page",
         href: "/page/" + Math.ceil(Math.random() * 40000),
     });
 
@@ -78,10 +81,10 @@ idxComponents.add(Items);
 registerRoute(idx, idxComponents);
 
 const About = () => {
-    const nav = b(ElementTag.H1, "About");
+    const nav = b(ElementTag.H1, { text: "About" });
     h(
         b(ElementTag.Title, "about // rhea"),
-        b(ElementTag.Link, "", {
+        b(ElementTag.Link, {
             href: "/dist/about.css",
             rel: "stylesheet",
             type: "text/css",

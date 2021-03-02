@@ -17,7 +17,8 @@ import {
 
 test("component register build() works", () => {
     const Heading: Component = () => {
-        const el = b(ElementTag.H1, "This is a heading.", {
+        const el = b(ElementTag.H1, {
+            text: "This is a heading.",
             style: `background-color:red`,
             class: "test",
         });

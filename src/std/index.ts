@@ -58,13 +58,12 @@ export enum ElementTag {
  */
 export function build(
     type: ElementTag | string,
-    text?: string,
-    attributes?: { [key: string]: string },
+    attributes?: { [key: string]: string } | string,
     ...children: HTMLElement[]
 ) {
     let element = document.createElement(type.toString());
-    element.innerText = text || "";
-    if (attributes) {
+    element.innerText = typeof attributes == 'string' ? attributes : attributes?.text || "";
+    if (typeof attributes == 'object') {
         Object.keys(attributes).forEach(item => {
             if (element.hasAttribute(item) || item in element) {
                 element.setAttribute(item, attributes[item]);
