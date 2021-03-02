@@ -70,8 +70,8 @@
     "files": [
         "./src/testing/index.ts",
         "./src/rt/index.ts",
-        "component.ts",
         "src/std/index.ts",
-        "examples/todomvc/index.ts"
+        "examples/todomvc/index.ts",
+        "./build.ts"
     ]
 }

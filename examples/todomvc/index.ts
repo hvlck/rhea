@@ -1,8 +1,8 @@
 import { Component, register, registerRoute, render } from "../../src/rt/index";
-import { build as b, ElementTag as El } from "../../src/std/index";
+import { build as b } from "../../src/std/index";
 
 const Nav = () => {
-    const nav = b(El.Nav);
+    const nav = b("nav");
 
     return nav;
 };
@@ -11,7 +11,7 @@ const idx = new Set<string>().add("/examples/hn/");
 register(Nav);
 
 const Items = () => {
-    const el = b(El.Ul);
+    const el = b("ul");
     return el;
 };
 

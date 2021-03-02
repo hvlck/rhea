@@ -2,7 +2,6 @@ import {
     append as a,
     build as b,
     ComponentEventType,
-    ElementTag,
     event as e,
     head as h,
 } from "../src/std/index";
@@ -17,7 +16,7 @@ import {
 
 test("component register build() works", () => {
     const Heading: Component = () => {
-        const el = b(ElementTag.H1, {
+        const el = b("h1", {
             text: "This is a heading.",
             style: `background-color:red`,
             class: "test",
@@ -41,15 +40,15 @@ test("component register build() works", () => {
 test("component register append() works", () => {
     const children = ["Home", "About", "Contact"];
     const Nav: Component = () => {
-        const el = b(ElementTag.Nav);
-        const kids = children.map(i => b(ElementTag.A, i));
+        const el = b("nav");
+        const kids = children.map(i => b("a", i));
         return a(el, ...kids);
     };
 
     const nav = Nav();
 
     const m = jest.fn(a);
-    m(nav, b(ElementTag.A, "Links"), b(ElementTag.A, "More items"));
+    m(nav, b("a", "Links"), b("a", "More items"));
 
     expect(m).toHaveBeenCalled();
     expect(m).toReturn();
@@ -66,7 +65,7 @@ test("component event() subscriber and state works", () => {
     const Button: Component = () => {
         const [st, set] = s("button", { clicks: 0 });
 
-        const el = b(ElementTag.Button, "Clicks: " + st.clicks);
+        const el = b("button", "Clicks: " + st.clicks);
 
         e(el, ComponentEventType.Click, () => {
             set({ clicks: st.clicks + 1 });

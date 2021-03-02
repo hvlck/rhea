@@ -1,0 +1,14 @@
+{
+    "name": "docs",
+    "version": "0.0.0",
+    "description": "rhea docs",
+    "main": "src/components.ts",
+    "repository": "https://github.com/hvlck/rhea",
+    "license": "GPL-3.0-or-later",
+    "private": true,
+    "dependencies": {},
+    "scripts": {
+        "build": "node ./build.ts",
+        "serve": "miniserve --index index.html ./"
+    }
+}

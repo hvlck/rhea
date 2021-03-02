@@ -10,16 +10,3 @@ require("esbuild")
         keepNames: true,
     })
     .catch(() => process.exit(1));
-
-require("esbuild")
-    .build({
-        entryPoints: ["./component.ts"],
-        bundle: true,
-        outfile: "dist/component.js",
-        minify: true,
-        sourcemap: true,
-        treeShaking: true,
-        watch: true,
-        keepNames: true,
-    })
-    .catch(() => process.exit(1));

@@ -194,6 +194,7 @@ const path = (destination = window.location.pathname) => {
  * Renders all components.
  * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
  */
+// todo: figure out a way to diff components on current page and next page, so that same components will not be removed
 export const render = (prev = true) => {
     if (prev) removeAll(document.body.children);
 

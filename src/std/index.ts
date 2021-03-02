@@ -3,61 +3,13 @@
 import { redraw } from "../rt/index";
 
 /**
- * A restrictive method of generating HTML elements for the b() function
- */
-export enum ElementTag {
-    H1 = "h1",
-    H2 = "h2",
-    H3 = "h3",
-    H4 = "h4",
-    H5 = "h5",
-    H6 = "h6",
-    P = "p",
-    Img = "img",
-    Canvas = "canvas",
-    Script = "script",
-    Link = "link",
-    Title = "title",
-    Meta = "meta",
-    Div = "div",
-    Input = "input",
-    Button = "button",
-    Label = "label",
-    Select = "select",
-    Option = "option",
-    OptGroup = "optgroup",
-    A = "a",
-    Nav = "nav",
-    Hr = "hr",
-    Table = "table",
-    Thead = "thead",
-    Tbody = "tbody",
-    Tr = "tr",
-    Th = "th",
-    Td = "td",
-    Span = "span",
-    Footer = "footer",
-    Main = "main",
-    B = "b",
-    Em = "em",
-    Del = "del",
-    Mark = "mark",
-    I = "i",
-    Template = "template",
-    Slot = "slot",
-    Ul = "ul",
-    Ol = "ol",
-    Br = "br",
-}
-
-/**
  * scaffolding for easily creating an html element
  * @param type The type of HTML element to create
  * @param text Optional text of the HTML element
  * @param attributes - Attributes to apply to the HTML element
  */
 export function build(
-    type: ElementTag | string,
+    type: string,
     attributes?: { [key: string]: string } | string,
     ...children: HTMLElement[]
 ) {
@@ -78,11 +30,7 @@ export function build(
         });
     }
 
-    if (children) {
-        const frag = document.createDocumentFragment();
-        children.forEach(el => frag.appendChild(el));
-        element.appendChild(frag);
-    }
+    if (children.length >= 1) append(element, ...children);
 
     return element;
 }
