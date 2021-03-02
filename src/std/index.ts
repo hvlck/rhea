@@ -47,6 +47,7 @@ export enum ElementTag {
     Slot = "slot",
     Ul = "ul",
     Ol = "ol",
+    Br = "br",
 }
 
 /**
@@ -90,13 +91,22 @@ export enum ComponentEventType {
 export function event(
     el: HTMLElement,
     evtType: ComponentEventType | string,
-    evt: (this: HTMLElement, ev: Event) => any
+    evt: (this: HTMLElement, ev: Event) => any,
+    rd?: string
 ) {
     // todo: maybe pass state as third arg to evt.call()
     // also maybe return the result of the call to evt.call()
     // return of `false` could also denote that component doesn't need to update
     el.addEventListener(evtType, event => evt.call(el, event));
-    if (el.dataset.component) redraw(el.dataset.component);
+    // may remove this call to redraw() in the future, redraw() is already called in state()
+    if (el.dataset.component) {
+        redraw(el.dataset.component);
+        return;
+    }
+
+    if (rd) {
+        redraw(rd);
+    }
 }
 
 /**

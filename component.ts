@@ -13,7 +13,7 @@ import {
     register,
     registerRoute,
     render,
-    s,
+    state as s,
 } from "./src/rt/index";
 
 const Idx = () => {
@@ -44,7 +44,7 @@ const Idx = () => {
         href: "/page/" + Math.ceil(Math.random() * 40000),
     });
 
-    return a(nav, home, abt, t, p);
+    return a(nav, home, abt, p, b(ElementTag.Br), t);
 };
 
 const idx: Set<string> = new Set();
@@ -100,7 +100,6 @@ registerRoute(abt, abtComp);
 
 const Page = () => {
     const el = b(ElementTag.H1, window.location.pathname.split("/page/")[1]);
-    console.warn(el);
     return el;
 };
 

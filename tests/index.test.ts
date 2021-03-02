@@ -12,7 +12,7 @@ import {
     register,
     registerRoute,
     render,
-    s,
+    state as s,
 } from "../src/rt/index";
 
 test("component register build() works", () => {

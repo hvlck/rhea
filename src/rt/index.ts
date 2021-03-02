@@ -1,15 +1,27 @@
 // rhea runtime manager
 export type Component = () => HTMLElement;
 
+/**
+ * Wrapper over a state manipulator.
+ */
 interface StateFunction {
-    readonly component: string;
     set: (updated: any) => any;
     state: any;
 }
 
+/**
+ * Global state object. Each key corresponds to a component. It is recommended that you don't set this directly and let
+ * rhea manage it for you.
+ */
 export const State: Map<string, StateFunction> = new Map();
 
-export const s = (component: string, state: any = {}) => {
+// possibly change signature so that to get state component would have to call s.call(Component, initialState)?
+/**
+ * Creates a new state or returns a previous state for a given component.
+ * @param component The component to retreive state from
+ * @param state The initial state structure
+ */
+export const state = (component: string, state: any = {}) => {
     const c = State.get(component);
     if (c) {
         return [c.state, c.set];
@@ -19,7 +31,7 @@ export const s = (component: string, state: any = {}) => {
             state,
             set: function (updated: any) {
                 s.state = updated;
-                redraw(s.component);
+                redraw(component);
                 return s.state;
             },
         };
@@ -144,6 +156,7 @@ const goTo = (evt: Event, url: URL) => {
     return false;
 };
 
+// shim for requestAnimationFrame
 const ra = window.requestAnimationFrame;
 window.requestAnimationFrame = (function () {
     return (
@@ -155,6 +168,11 @@ window.requestAnimationFrame = (function () {
     );
 })();
 
+/**
+ * Returns a component list for the matching URL path. Note that exact string matches have higher precedence
+ * than RegExp matches. A return of `false` indicates that there is no match.
+ * @param destination The pathname to check for dynamic paths
+ */
 const path = (destination = window.location.pathname) => {
     const r = Array.from(Index)?.find(([i, s]) => {
         // exact matches will have precedence
@@ -179,7 +197,6 @@ const path = (destination = window.location.pathname) => {
 export const render = (prev = true) => {
     if (prev) removeAll(document.body.children);
 
-    console.warn(path());
     const components = path();
     if (components == false)
         throw Error(`${window.location.pathname} is an invalid route`);
