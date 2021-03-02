@@ -40,7 +40,11 @@ const Idx = () => {
         href: "/about",
     });
 
-    return a(nav, home, abt, t);
+    const p = b(ElementTag.A, "Page", {
+        href: "/page/" + Math.ceil(Math.random() * 40000),
+    });
+
+    return a(nav, home, abt, t, p);
 };
 
 const idx: Set<string> = new Set();
@@ -93,5 +97,19 @@ register(About);
 const abtComp: Set<Component> = new Set();
 abtComp.add(Idx).add(About);
 registerRoute(abt, abtComp);
+
+const Page = () => {
+    const el = b(ElementTag.H1, window.location.pathname.split("/page/")[1]);
+    console.warn(el);
+    return el;
+};
+
+const etc: Set<string | RegExp> = new Set();
+etc.add(/\/page\/.+/);
+register(Page);
+
+const etcComp: Set<Component> = new Set();
+etcComp.add(Idx).add(Page);
+registerRoute(etc, etcComp);
 
 window.addEventListener("load", () => render());

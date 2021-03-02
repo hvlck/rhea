@@ -41,12 +41,12 @@ export const Components: Map<string, Component> = new Map();
  * The key is the route, and the value is the list of components the route is made of.
  * It is recommended that you do not modify this directly.
  */
-export const Index: Map<string, Set<string>> = new Map();
+export const Index: Map<string | RegExp, Set<string>> = new Map();
 
 /**
  * Re-renders items whenever the user uses the browser's forward/back buttons
  */
-window.addEventListener("popstate", evt => {
+window.addEventListener("popstate", () => {
     emit(document.body, EventType.BeforePageChange);
     render(true);
     emit(document.body, EventType.AfterPageChange);
@@ -76,9 +76,10 @@ export const register = (element: Component) => {
 // maybe change return value to set, so that callers can do
 // const indexRoute = registerRoute("/home").add("Nav").add("Content").add("Footer")
 export const registerRoute = (
-    paths: Set<string>,
+    paths: Set<string | RegExp>,
     components: Set<Component>
 ) => {
+    // maps given components into their internal names, which is the function name in lowercase
     const s = Array.from(components).map(i => i.name?.toLowerCase());
 
     const cmp: Set<string> = new Set();
@@ -86,6 +87,8 @@ export const registerRoute = (
     paths.forEach(i => {
         Index.set(i, cmp);
     });
+
+    return;
 };
 
 // removes all children from the given element
@@ -102,20 +105,24 @@ const removeAll = (el: HTMLCollection) => {
  * such as one from an `<a>` element.
  */
 export const navigate = (destination: URL) => {
+    const old = window.location.pathname;
     const p = destination.pathname;
     window.history.pushState("", "", p);
+    emit(document.body, EventType.Navigation, { old, next: p });
     render(true);
 };
 
 /**
  * Note that the render event will be scoped to the element is called on, while the before/after page change events
  * are called on `document.body`
+ * @param Navigation Fired immediately after history.pushState() is called
  * @param Render The render event, called whenever a page is rendered.
  * @param GlobalRender Called on `document.body` whenever the page is changed and triggers a complete rerender.
  * @param BeforePageChange Called before a page is changed using the History API
  * @param AfterPageChange Called after a page is changed and rendered.
  */
 export enum EventType {
+    Navigation = "navigation",
     Render = "render",
     GlobalRender = "global-render",
     BeforePageChange = "before-page-change",
@@ -129,7 +136,6 @@ const emit = (el: HTMLElement, event: EventType, detail?: Object) =>
 // helper function for binding `<a>` elements to prevent default navigation behaviour
 const goTo = (evt: Event, url: URL) => {
     evt.preventDefault();
-    if (url.pathname == window.location.pathname) return false;
     if (evt.defaultPrevented == true) {
         navigate(url);
         return true;
@@ -149,6 +155,23 @@ window.requestAnimationFrame = (function () {
     );
 })();
 
+const path = (destination = window.location.pathname) => {
+    const r = Array.from(Index)?.find(([i, s]) => {
+        // exact matches will have precedence
+        if (typeof i == "string" && i == destination) {
+            return s;
+        } else if (i instanceof RegExp && i.test(destination) == true) {
+            return s;
+        } else {
+            return false;
+        }
+    });
+    if (r && r[0]) return r[1];
+    else {
+        return false;
+    }
+};
+
 /**
  * Renders all components.
  * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
@@ -156,7 +179,11 @@ window.requestAnimationFrame = (function () {
 export const render = (prev = true) => {
     if (prev) removeAll(document.body.children);
 
-    const components = Index.get(window.location.pathname);
+    console.warn(path());
+    const components = path();
+    if (components == false)
+        throw Error(`${window.location.pathname} is an invalid route`);
+
     let c: HTMLElement[] = [];
 
     components?.forEach(i => {
