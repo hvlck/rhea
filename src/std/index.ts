@@ -62,8 +62,13 @@ export function build(
     ...children: HTMLElement[]
 ) {
     let element = document.createElement(type.toString());
-    element.innerText = typeof attributes == 'string' ? attributes : attributes?.text || "";
-    if (typeof attributes == 'object') {
+    if (attributes && typeof attributes == "string") {
+        element.textContent = attributes;
+    } else if (attributes && typeof attributes == "object" && attributes.text) {
+        element.textContent = attributes.text;
+    }
+
+    if (typeof attributes == "object") {
         Object.keys(attributes).forEach(item => {
             if (element.hasAttribute(item) || item in element) {
                 element.setAttribute(item, attributes[item]);
@@ -72,21 +77,54 @@ export function build(
             }
         });
     }
+
     if (children) {
-        children.forEach(i => element.appendChild(i));
+        const frag = document.createDocumentFragment();
+        children.forEach(el => frag.appendChild(el));
+        element.appendChild(frag);
     }
+
     return element;
 }
 
+/**
+ * Helper function to append children to parent.
+ * @param parent Parent element to append children to
+ * @param children Elements to append to parent
+ */
 export function append(parent: HTMLElement, ...children: HTMLElement[]) {
-    children.forEach(i => parent.appendChild(i));
+    const frag = document.createDocumentFragment();
+    children.forEach(i => frag.appendChild(i));
+    parent.appendChild(frag);
     return parent;
 }
 
+/**
+ * Event types for components. A string can be passed, but this is a typed variant for better safety.
+ * @param Click Click event
+ */
 export enum ComponentEventType {
     Click = "click",
+    Keydown = "keydown",
+    Keyup = "keyup",
+    Keypress = "keypress",
+    Focus = "focus",
+    Blur = "blur",
+    Input = "input",
+    Change = "change",
+    MouseOver = "mouseover",
+    MouseEnter = "mouseenter",
+    MouseExit = "mousexit",
+    MouseLeave = "mouseleave",
 }
 
+/**
+ *
+ * @param el The element to bind the event to
+ * @param evtType The type of event to listen for
+ * @param evt The callback to perform when the event is triggered
+ * @param rd Redraw - if set, the specified element will be redrawn. If the `el` parameter is a component, it will automatically be redrawn.
+ */
 export function event(
     el: HTMLElement,
     evtType: ComponentEventType | string,

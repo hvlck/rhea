@@ -201,17 +201,18 @@ export const render = (prev = true) => {
     if (components == false)
         throw Error(`${window.location.pathname} is an invalid route`);
 
-    let c: HTMLElement[] = [];
+    let frag = new DocumentFragment();
 
     components?.forEach(i => {
         const cmp = Components.get(i);
         if (cmp) {
-            c.push(hydrate(cmp, i));
+            frag.appendChild(hydrate(cmp, i));
             return;
         }
     });
+
     requestAnimationFrame(() => {
-        document.body.append(...c);
+        document.body.append(frag);
         emit(document.body, EventType.GlobalRender);
     });
 

@@ -36,7 +36,6 @@ const Idx = () => {
         set({ clicks: st.clicks + 1 });
     });
 
-    const t = b(ElementTag.P, { text: "Clicks: " + st.clicks });
     const abt = b(ElementTag.A, {
         text: "About",
         href: "/about",
@@ -47,7 +46,7 @@ const Idx = () => {
         href: "/page/" + Math.ceil(Math.random() * 40000),
     });
 
-    return a(nav, home, abt, p, b(ElementTag.Br), t);
+    return a(nav, home, abt, p, b(ElementTag.Br));
 };
 
 const idx: Set<string> = new Set();
@@ -62,15 +61,21 @@ const Items = () => {
     fetch("https://jsonplaceholder.typicode.com/posts")
         .then(response => response.json())
         .then(json => {
-            json.forEach((i: any) => {
-                const d = b(ElementTag.Div);
-                const id = b(ElementTag.P, i.id);
-                const title = b(ElementTag.P, i.title);
-                const completed = b(ElementTag.P, i.completed);
+            json.forEach(
+                (i: {
+                    body: string;
+                    userId: number;
+                    title: string;
+                    id: number;
+                }) => {
+                    const d = b(ElementTag.Div);
+                    const id = b(ElementTag.P, i.id.toString());
+                    const title = b(ElementTag.P, i.title);
 
-                a(d, id, title, completed);
-                a(el, d);
-            });
+                    a(d, id, title);
+                    a(el, d);
+                }
+            );
         });
 
     return el;
