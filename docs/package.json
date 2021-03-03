@@ -6,9 +6,7 @@
     "repository": "https://github.com/hvlck/rhea",
     "license": "GPL-3.0-or-later",
     "private": true,
-    "dependencies": {
-        "prismjs": "^1.23.0"
-    },
+    "dependencies": {},
     "scripts": {
         "build": "node ./build.ts",
         "serve": "miniserve --index index.html ./"

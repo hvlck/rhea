@@ -1,11 +1,5 @@
 import { build as b, append as a } from "../../src/std/index";
 
-import Prism from "prismjs";
-
-const highlight = (text: string, language: any, lang: string): HTMLElement => {
-    return Prism.highlight(text, language, lang);
-};
-
 export const Index = () => {
     const el = b("div");
     return a(

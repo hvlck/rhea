@@ -240,9 +240,11 @@ const hydrate = (i: Component, name: string) => {
 
     if (hasLink.length >= 1) {
         hasLink.forEach(i =>
-            i.addEventListener("click", evt =>
-                goTo(evt, new URL((i as HTMLAnchorElement).href))
-            )
+            i.addEventListener("click", evt => {
+                if (i.dataset.bound) return;
+                i.dataset.bound = "true";
+                goTo(evt, new URL((i as HTMLAnchorElement).href));
+            })
         );
     }
 
@@ -250,9 +252,11 @@ const hydrate = (i: Component, name: string) => {
         el instanceof HTMLAnchorElement &&
         new URL(el.href).origin.startsWith(window.location.origin) == true
     ) {
-        el.addEventListener("click", evt =>
-            goTo(evt, new URL((el as HTMLAnchorElement).href))
-        );
+        el.addEventListener("click", evt => {
+            if (el.dataset.bound) return;
+            el.dataset.bound = "true";
+            goTo(evt, new URL((el as HTMLAnchorElement).href));
+        });
     }
 
     el.dataset.component = name;

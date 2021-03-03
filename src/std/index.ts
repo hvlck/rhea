@@ -48,6 +48,8 @@ export function append(parent: HTMLElement, ...children: HTMLElement[]) {
             const url = new URL(i.href);
             if (url.origin.startsWith(window.location.origin) == true) {
                 i.addEventListener("click", evt => {
+                    if (i.dataset.bound) return;
+                    i.dataset.bound = "true";
                     goTo(evt, url);
                 });
             }
