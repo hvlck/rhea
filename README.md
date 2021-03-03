@@ -11,8 +11,35 @@ Various things I would like to experiment with before fleshing out design:
 + proxies
 + decorators
 + generators
-+ actor model
++ actor model?
   + pub/sub channels using window events?
+    + BroadcastChannel/Channel Messaging API?
+
+## Roadmap
+
++ ~~dynamic path segments~~
++ ~~state~~
++ some way to use CSS
++ testing framework
++ ~~method to disable auto-linking on `<a>` elements~~
+  + `el.dataset.bound`
++ more events
+  + global re-renders
+  + first initialisation
++ JSX support
++ i18n internationalisation
++ docs
+
+## Scratchpad
+
++ fetch progress
+  + `content-length` headers
+    + [samundrak/fetch-progress: Progress of response for fetch API](https://github.com/samundrak/fetch-progress)
+  + Streams API
+    + [AnthumChris/fetch-progress-indicators: Progress indicators/bars using Streams, Service Workers, and Fetch APIs](https://github.com/AnthumChris/fetch-progress-indicators)
+  + Writable streams
++ performance testing with `console.profile()`
++ `data-refresh` to refresh all content
 
 ## Principles
 
@@ -53,6 +80,28 @@ t('component properly changes ', (test) => {
 ```
 
 ### Runtime
+
+#### Data Model
+
+Rough pseudo-code for a model-data framework for rhea:
+
+```typescript
+interface Models {
+  // store all bound HTML elements in memory
+  // if this does get implemented, benchmark this versus query-selecting everything
+  elements: Map<string, HTMLElement[]>,
+  // list of all key/value pairs that are bound; the key in this corresponds to the key in the Models.elements property
+  models: Map<string, string>,
+  // register a new variable to watch
+  register: (key: string, value: string, element: HTMLElement): void,
+  // update a value, update all elements that use the value
+  update: (key: string, value: string): void
+}
+
+const models: Map<string, string> = new Map();
+
+// is it possible to wrap a proxy on any key, so that attempts to access the key will result in normal behaviour but also call Models.update() internally rather than the developer having to call it manually?
+```
 
 #### Extensions and Middleware
 
@@ -109,3 +158,46 @@ Ideas for optional libraries.
 
 + sessions (save to local/session storage)
 + cache (dynamic caching like caracal)
+
+## Examples
+
+```typescript
+import {
+    append as a,
+    build as b,
+    ComponentEventType,
+    ElementTag,
+    event as e,
+    head as h,
+} from "./src/std/index";
+import {
+    Components,
+    Component,
+    redraw,
+    register,
+    mount,
+    render,
+    state as s,
+} from "./src/rt/index";
+
+const Btn = () => {
+    const [st, set] = s("btn", { clicks: 0 });
+    const nav = b(ElementTag.Div);
+    const plus = b(ElementTag.Button, "+");
+    const minus = b(ElementTag.Button, "-");
+
+    e(plus, ComponentEventType.Click, () => {
+        set({ clicks: st.clicks + 1 });
+    });
+
+    e(minus, ComponentEventType.Click, () => {
+        set({ clicks: st.clicks - 1 });
+    });
+
+    const t = b(ElementTag.P, "Clicks: " + st.clicks);
+
+    return a(nav, t, b(ElementTag.Br), plus, minus);
+};
+
+register(Btn);
+```

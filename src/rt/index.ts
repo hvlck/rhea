@@ -85,22 +85,22 @@ export const register = (element: Component) => {
  * @param paths The paths you want to register the components for
  * @param components The components you want to register on the path
  */
-// maybe change return value to set, so that callers can do
-// const indexRoute = registerRoute("/home").add("Nav").add("Content").add("Footer")
-export const registerRoute = (
-    paths: Set<string | RegExp>,
-    components: Set<Component>
-) => {
+export const mount = (components: Set<Component>, path: string | RegExp) => {
     // maps given components into their internal names, which is the function name in lowercase
     const s = Array.from(components).map(i => i.name?.toLowerCase());
 
     const cmp: Set<string> = new Set();
     s.forEach(i => cmp.add(i));
-    paths.forEach(i => {
-        Index.set(i, cmp);
-    });
+    Index.set(path, cmp);
 
-    return;
+    const r = {
+        add: (route: string) => {
+            Index.set(route, cmp);
+            return r;
+        },
+    };
+
+    return r;
 };
 
 // removes all children from the given element

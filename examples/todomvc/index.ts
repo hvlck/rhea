@@ -1,4 +1,4 @@
-import { Component, register, registerRoute, render } from "../../src/rt/index";
+import { Component, register, mount, render } from "../../src/rt/index";
 import { build as b } from "../../src/std/index";
 
 const Nav = () => {
@@ -7,7 +7,6 @@ const Nav = () => {
     return nav;
 };
 
-const idx = new Set<string>().add("/examples/hn/");
 register(Nav);
 
 const Items = () => {
@@ -20,5 +19,5 @@ register(Items);
 const idxComponents: Set<Component> = new Set();
 idxComponents.add(Nav).add(Items);
 
-registerRoute(idx, idxComponents);
+mount(idxComponents, "/examples/hn/");
 window.addEventListener("load", () => render());

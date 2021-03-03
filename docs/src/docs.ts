@@ -14,7 +14,8 @@ Rhea is also primarily feature-complete at this point. It makes a point of being
         a(
             b("ul"),
             b("li", "Size: 2.99 KB before gzipping"),
-            b("li", "Simple and minimal API")
+            b("li", "Simple and minimal API"),
+            b("li", "Blazing fast for all your performance needs")
         )
     );
 };

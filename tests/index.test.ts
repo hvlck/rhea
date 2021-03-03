@@ -9,7 +9,7 @@ import {
     Component,
     redraw,
     register,
-    registerRoute,
+    mount,
     render,
     state as s,
 } from "../src/rt/index";

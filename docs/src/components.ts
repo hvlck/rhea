@@ -10,7 +10,7 @@ import {
     Component,
     redraw,
     register,
-    registerRoute,
+    mount,
     render,
     state as s,
 } from "../../src/rt/index";
@@ -62,7 +62,6 @@ const Nav = () => {
 };
 
 const nav: Set<string> = new Set();
-nav.add("/").add("/components").add("/runtime").add("/router").add("/state");
 register(Nav);
 
 const Docs = () => {
@@ -130,17 +129,20 @@ const Docs = () => {
 };
 
 register(Docs);
-const docs: Set<RegExp> = new Set();
-docs.add(/\/+./);
 
 const docsComp: Set<Component> = new Set();
 docsComp.add(Nav).add(Docs);
-registerRoute(docs, docsComp);
+mount(docsComp, /\/+./);
 
 const navComponents: Set<Component> = new Set();
 navComponents.add(Nav).add(Docs);
 
-registerRoute(nav, navComponents);
+mount(navComponents, "/")
+    .add("/")
+    .add("/components")
+    .add("/runtime")
+    .add("/router")
+    .add("/state");
 
 window.addEventListener("load", () => render());
 document.body.addEventListener("global-render", () => {}, { once: true });
