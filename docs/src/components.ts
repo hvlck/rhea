@@ -25,7 +25,14 @@ const Idx = () => {
         href: "/",
     });
 
-    return a(nav, home);
+    return a(
+        nav,
+        home,
+        b("a", {
+            text: "Source",
+            href: "https://github.com/hvlck/rhea",
+        })
+    );
 };
 
 const idx: Set<string> = new Set();
@@ -37,15 +44,14 @@ const Docs = () => {
     const content = b(
         "p",
         `
-        This is a test.
-        This is some content.
+        Rhea makes it easy to write fast, reactive websites.
         `
     );
 
     return a(
         el,
         b("h1", "Rhea"),
-        b("h2", "the micro rendering framework"),
+        b("h2", "The micro rendering framework"),
         content
     );
 };

@@ -228,8 +228,15 @@ export const render = (prev = true) => {
 const hydrate = (i: Component, name: string) => {
     const el: HTMLElement = i?.call(null);
 
-    const kids = Array.from(el.children);
-    const hasLink = kids.filter(kid => kid.nodeName == "A");
+    const kids: HTMLElement[] = Array.from(el.children).map(
+        el => el as HTMLElement
+    );
+    const hasLink = kids.filter(
+        (kid: HTMLElement) =>
+            kid instanceof HTMLAnchorElement &&
+            kid.href &&
+            kid.href.startsWith(window.location.href) == true
+    );
 
     if (hasLink.length >= 1) {
         hasLink.forEach(i =>
@@ -239,7 +246,10 @@ const hydrate = (i: Component, name: string) => {
         );
     }
 
-    if (el.nodeName == "A") {
+    if (
+        el instanceof HTMLAnchorElement &&
+        el.href.startsWith(window.location.href) == true
+    ) {
         el.addEventListener("click", evt =>
             goTo(evt, new URL((el as HTMLAnchorElement).href))
         );
