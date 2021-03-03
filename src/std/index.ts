@@ -46,10 +46,7 @@ export function append(parent: HTMLElement, ...children: HTMLElement[]) {
     children.forEach(i => {
         if (i instanceof HTMLAnchorElement) {
             const url = new URL(i.href);
-            if (
-                url.href.startsWith(window.location.href) &&
-                url.pathname.startsWith(window.location.pathname)
-            ) {
+            if (url.origin.startsWith(window.location.origin) == true) {
                 i.addEventListener("click", evt => {
                     goTo(evt, url);
                 });

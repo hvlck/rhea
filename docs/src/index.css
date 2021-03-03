@@ -44,6 +44,10 @@ p {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+li {
+    font-size: 14pt;
+}
+
 a,
 a:visited {
     color: var(--highlight);
@@ -57,7 +61,8 @@ a:focus {
     text-decoration: none;
 }
 
-nav {
+nav,
+nav div {
     margin: 0.5em 0.25em 0.25em 0;
     font-size: 16pt;
 
@@ -68,12 +73,18 @@ nav {
     align-items: center;
 }
 
+nav div {
+    justify-content: center;
+    min-width: 50%;
+}
+
 nav div a {
     margin: auto 2% auto 0;
 }
 
 @media screen and (max-width: 768px) {
-    nav {
+    nav,
+    nav div {
         flex-flow: column wrap;
         justify-content: center;
         align-items: center;

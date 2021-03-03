@@ -15,9 +15,34 @@ import {
     state as s,
 } from "../../src/rt/index";
 
-import marked from "marked";
+import {
+    Components as Cmp,
+    Index,
+    Runtime,
+    Router,
+    State,
+    Std,
+    Examples,
+    Testing,
+    UnderTheHood,
+} from "./docs";
 
-const Idx = () => {
+const Toc = () => {
+    const toc = b("div");
+    return a(
+        toc,
+        b("a", { text: "Components", href: "/components" }),
+        b("a", { text: "Runtime", href: "/runtime" }),
+        b("a", { text: "Router", href: "/router" }),
+        b("a", { text: "State", href: "/state" }),
+        b("a", { text: "Standard Library", href: "/std" }),
+        b("a", { text: "Examples", href: "/examples" }),
+        b("a", { text: "Testing", href: "/testing" }),
+        b("a", { text: "Under the Hood", href: "/under-the-hood" })
+    );
+};
+
+const Nav = () => {
     h(b("title", { text: "index // rhea" }));
     const nav = b("nav", { class: "nav" });
     const home = b("a", {
@@ -28,6 +53,7 @@ const Idx = () => {
     return a(
         nav,
         home,
+        Toc(),
         b("a", {
             text: "Source",
             href: "https://github.com/hvlck/rhea",
@@ -35,38 +61,86 @@ const Idx = () => {
     );
 };
 
-const idx: Set<string> = new Set();
-idx.add("/").add("/about");
-register(Idx);
+const nav: Set<string> = new Set();
+nav.add("/").add("/components").add("/runtime").add("/router").add("/state");
+register(Nav);
 
 const Docs = () => {
     const el = b("div");
-    const content = b(
-        "p",
-        `
-        Rhea makes it easy to write fast, reactive websites.
-        `
+    let content: HTMLElement;
+    switch (window.location.pathname) {
+        case "/": {
+            content = Index();
+            break;
+        }
+        case "/components": {
+            content = Cmp();
+            break;
+        }
+        case "/runtime": {
+            content = Runtime();
+            break;
+        }
+        case "/router": {
+            content = Router();
+            break;
+        }
+        case "/state": {
+            content = State();
+            break;
+        }
+        case "/std": {
+            content = Std();
+            break;
+        }
+        case "/examples": {
+            content = Examples();
+            break;
+        }
+        case "/testing": {
+            content = Testing();
+            break;
+        }
+        case "/under-the-hood": {
+            content = UnderTheHood();
+            break;
+        }
+        default: {
+            content = b("p", "Not Found");
+        }
+    }
+
+    h(
+        b(
+            "title",
+            `${
+                window.location.pathname.slice(1) != ""
+                    ? window.location.pathname.slice(1)
+                    : "index"
+            } // rhea`
+        )
     );
 
     return a(
         el,
         b("h1", "Rhea"),
-        b("h2", "The micro rendering framework"),
-        content
+        b("p", "The micro rendering framework"),
+        a(b("div", { id: "content" }), content)
     );
 };
 
 register(Docs);
 const docs: Set<RegExp> = new Set();
-docs.add(/\/docs\/+./);
+docs.add(/\/+./);
 
 const docsComp: Set<Component> = new Set();
-docsComp.add(Docs);
+docsComp.add(Nav).add(Docs);
 registerRoute(docs, docsComp);
 
-const idxComponents: Set<Component> = new Set();
-idxComponents.add(Idx).add(Docs);
+const navComponents: Set<Component> = new Set();
+navComponents.add(Nav).add(Docs);
 
-registerRoute(idx, idxComponents);
+registerRoute(nav, navComponents);
 
 window.addEventListener("load", () => render());
+document.body.addEventListener("global-render", () => {}, { once: true });

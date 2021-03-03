@@ -235,9 +235,7 @@ const hydrate = (i: Component, name: string) => {
         (kid: HTMLElement) =>
             kid instanceof HTMLAnchorElement &&
             kid.href &&
-            new URL(kid.href).href.startsWith(window.location.href) == true &&
-            new URL(kid.href).pathname.startsWith(window.location.pathname) ==
-                true
+            new URL(kid.href).origin.startsWith(window.location.origin) == true
     );
 
     if (hasLink.length >= 1) {
@@ -250,7 +248,7 @@ const hydrate = (i: Component, name: string) => {
 
     if (
         el instanceof HTMLAnchorElement &&
-        el.href.startsWith(window.location.href) == true
+        new URL(el.href).origin.startsWith(window.location.origin) == true
     ) {
         el.addEventListener("click", evt =>
             goTo(evt, new URL((el as HTMLAnchorElement).href))
