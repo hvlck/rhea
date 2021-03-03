@@ -146,7 +146,7 @@ const emit = (el: HTMLElement, event: EventType, detail?: Object) =>
     el.dispatchEvent(new CustomEvent(event.toString(), { detail }));
 
 // helper function for binding `<a>` elements to prevent default navigation behaviour
-const goTo = (evt: Event, url: URL) => {
+export const goTo = (evt: Event, url: URL) => {
     evt.preventDefault();
     if (evt.defaultPrevented == true) {
         navigate(url);
@@ -235,7 +235,9 @@ const hydrate = (i: Component, name: string) => {
         (kid: HTMLElement) =>
             kid instanceof HTMLAnchorElement &&
             kid.href &&
-            kid.href.startsWith(window.location.href) == true
+            new URL(kid.href).href.startsWith(window.location.href) == true &&
+            new URL(kid.href).pathname.startsWith(window.location.pathname) ==
+                true
     );
 
     if (hasLink.length >= 1) {

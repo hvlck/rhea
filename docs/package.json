@@ -6,7 +6,9 @@
     "repository": "https://github.com/hvlck/rhea",
     "license": "GPL-3.0-or-later",
     "private": true,
-    "dependencies": {},
+    "dependencies": {
+        "highlight.js": "^10.6.0"
+    },
     "scripts": {
         "build": "node ./build.ts",
         "serve": "miniserve --index index.html ./"

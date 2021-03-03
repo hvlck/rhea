@@ -1,6 +1,6 @@
 // standard library utilities
 
-import { redraw } from "../rt/index";
+import { goTo, navigate, redraw } from "../rt/index";
 
 /**
  * scaffolding for easily creating an html element
@@ -22,6 +22,7 @@ export function build(
 
     if (typeof attributes == "object") {
         Object.keys(attributes).forEach(item => {
+            if (item == "text") return;
             if (element.hasAttribute(item) || item in element) {
                 element.setAttribute(item, attributes[item]);
             } else if (item == "class") {
@@ -42,7 +43,20 @@ export function build(
  */
 export function append(parent: HTMLElement, ...children: HTMLElement[]) {
     const frag = document.createDocumentFragment();
-    children.forEach(i => frag.appendChild(i));
+    children.forEach(i => {
+        if (i instanceof HTMLAnchorElement) {
+            const url = new URL(i.href);
+            if (
+                url.href.startsWith(window.location.href) &&
+                url.pathname.startsWith(window.location.pathname)
+            ) {
+                i.addEventListener("click", evt => {
+                    goTo(evt, url);
+                });
+            }
+        }
+        frag.appendChild(i);
+    });
     parent.appendChild(frag);
     return parent;
 }
