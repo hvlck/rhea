@@ -31,8 +31,8 @@ const Toc = () => {
     const toc = b("div");
     return a(
         toc,
-        b("a", { text: "Components", href: "/components" }),
         b("a", { text: "Runtime", href: "/runtime" }),
+        b("a", { text: "Components", href: "/components" }),
         b("a", { text: "Router", href: "/router" }),
         b("a", { text: "State", href: "/state" }),
         b("a", { text: "Standard Library", href: "/std" }),

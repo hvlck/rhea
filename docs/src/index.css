@@ -36,10 +36,11 @@ body {
 }
 
 h1 {
-    margin: 0.25em 0 0.5em 0;
+    margin: 0 0 0.5em 0;
 }
 
 p {
+    margin: 0.7em 0;
     font-size: 16pt;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -61,9 +62,31 @@ a:focus {
     text-decoration: none;
 }
 
+div code {
+    margin: -0.2em 0 !important;
+}
+
+code {
+    font-weight: bold;
+    font-family: "Consolas", monospace;
+    display: block;
+    padding: 6px;
+    border-top: 2px solid var(--highlight);
+    color: var(--highlight);
+    background: var(--quaternary);
+}
+
+kbd {
+    font-weight: bold;
+    font-family: "Consolas", monospace;
+    padding: 6px;
+    color: var(--highlight);
+    background: var(--quaternary);
+}
+
 nav,
 nav div {
-    margin: 0.5em 0.25em 0.25em 0;
+    margin: 0em 0.25em 0.25em 0;
     font-size: 16pt;
 
     display: flex;

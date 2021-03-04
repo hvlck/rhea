@@ -5,8 +5,6 @@ require("esbuild")
         outfile: "dist/index.js",
         minify: true,
         sourcemap: true,
-        treeShaking: true,
-        watch: true,
         keepNames: true,
     })
     .catch(() => process.exit(1));
