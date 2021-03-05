@@ -73,10 +73,11 @@ window.addEventListener("popstate", () => {
  */
 export const register = (element: Component) => {
     const n = element.name.toLowerCase();
-    if (Components.get(n))
+    if (Components.get(n)) {
         throw Error(`component ${n} has already been defined!`);
-    else {
+    } else {
         Components.set(element.name.toLowerCase(), element);
+        return true;
     }
 };
 
@@ -105,7 +106,7 @@ export const mount = (components: Set<Component>, path: string | RegExp) => {
 
 // removes all children from the given element
 const removeAll = (el: HTMLCollection) => {
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
         Array.from(el).forEach(i => i.remove());
     });
 };
@@ -212,7 +213,7 @@ export const render = (prev = true) => {
         }
     });
 
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
         document.body.append(frag);
         emit(document.body, EventType.GlobalRender);
     });
@@ -272,5 +273,9 @@ export const redraw = (component: string) => {
     const cmp = Components.get(component);
     if (el && cmp) {
         el.replaceWith(hydrate(cmp, component));
+    } else {
+        throw Error(
+            `failed to get component ${component}, does not exist in body`
+        );
     }
 };

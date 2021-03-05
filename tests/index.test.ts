@@ -1,103 +1,43 @@
 import {
-    append as a,
-    build as b,
-    ComponentEventType,
-    event as e,
-    head as h,
-} from "../src/std/index";
-import {
     Component,
-    redraw,
-    register,
+    Components,
     mount,
+    register,
     render,
-    state as s,
-} from "../src/rt/index";
+    state,
+} from "../src/rt";
+import { build } from "../src/std";
 
-test("component register build() works", () => {
-    const Heading: Component = () => {
-        const el = b("h1", {
-            text: "This is a heading.",
-            style: `background-color:red`,
-            class: "test",
-        });
+// broken as JSDOM doesn't support requestAnimationFrame()
+test("state() functions", () => {
+    const T = () => {
+        const el = build("p");
         return el;
     };
-    const m = jest.fn(Heading);
-    m(); // has to call m() at least once
+    register(T);
+    mount(new Set<Component>().add(T), "/");
+    render();
 
-    expect(m).toHaveBeenCalled();
-    expect(m).toReturn();
-    expect(Heading).toBeDefined();
+    const [st, set] = state("t", { clicks: 0 });
+    const s = () => set({ clicks: st.clicks + 1 });
 
-    const el = Heading();
-    expect(el.className).toBe("test");
-    expect(el.innerText).toBe("This is a heading.");
-
-    expect(el).toBeInstanceOf(HTMLElement);
+    s();
+    expect(st.clicks).toBe(1);
+    expect(st).not.toBeNull();
+    expect(st.random).toBeNull();
 });
 
-test("component register append() works", () => {
-    const children = ["Home", "About", "Contact"];
-    const Nav: Component = () => {
-        const el = b("nav");
-        const kids = children.map(i => b("a", i));
-        return a(el, ...kids);
-    };
-
-    const nav = Nav();
-
-    const m = jest.fn(a);
-    m(nav, b("a", "Links"), b("a", "More items"));
-
-    expect(m).toHaveBeenCalled();
-    expect(m).toReturn();
-    expect(Nav).toBeDefined();
-
-    expect(nav.children.length).toBe(5);
-    expect((nav.lastElementChild as HTMLElement).innerText).toBe("More items");
-
-    expect(nav).toBeInstanceOf(HTMLElement);
-    expect(nav.lastElementChild).toBeInstanceOf(Element);
-});
-
-test("component event() subscriber and state works", () => {
-    const Button: Component = () => {
-        const [st, set] = s("button", { clicks: 0 });
-
-        const el = b("button", "Clicks: " + st.clicks);
-
-        e(el, ComponentEventType.Click, () => {
-            set({ clicks: st.clicks + 1 });
-            redraw("button");
-        });
-
+// component T is already registered
+test("register() functions properly", () => {
+    const Z = () => {
+        const el = build("p");
         return el;
     };
 
-    const idx: Set<string> = new Set();
-    idx.add("/");
-    register(Button);
-    const idxComponents: Set<Component> = new Set();
-    idxComponents.add(Button);
-
-    const m = jest.fn(e);
-
-    const btn = Button();
-    let cb = 0;
-    m(btn, ComponentEventType.Click, function () {
-        cb += 1;
-    });
-
-    expect(m).toHaveBeenCalled();
-    expect(m).toReturn();
-    expect(Button).toBeDefined();
-
-    btn.click();
-    expect(btn.innerText).toBe("Clicks: 1");
-    expect(cb).toBe(1);
-
-    btn.click();
-    expect(btn.innerText).toBe("Clicks: 2");
-    expect(cb).toBe(2);
+    const s = register(Z);
+    expect(s).toBe(true);
+    expect(Components.get("z")).toBe(Z);
+    expect(Components.size).toBe(2);
 });
+
+test("mount() properly registers mount paths", () => {});

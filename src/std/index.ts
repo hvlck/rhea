@@ -44,7 +44,7 @@ export function build(
 export function append(parent: HTMLElement, ...children: HTMLElement[]) {
     const frag = document.createDocumentFragment();
     children.forEach(i => {
-        if (i instanceof HTMLAnchorElement) {
+        if (i instanceof HTMLAnchorElement && i.href) {
             const url = new URL(i.href);
             if (url.origin.startsWith(window.location.origin) == true) {
                 i.addEventListener("click", evt => {
@@ -80,7 +80,7 @@ export enum ComponentEventType {
 }
 
 /**
- *
+ * subscribes an element to the given event, and calls the passed callback when the event fires
  * @param el The element to bind the event to
  * @param evtType The type of event to listen for
  * @param evt The callback to perform when the event is triggered
@@ -95,7 +95,10 @@ export function event(
     // todo: maybe pass state as third arg to evt.call()
     // also maybe return the result of the call to evt.call()
     // return of `false` could also denote that component doesn't need to update
-    el.addEventListener(evtType, event => evt.call(el, event));
+    el.addEventListener(evtType, event => {
+        evt.call(el, event);
+    });
+
     // may remove this call to redraw() in the future, redraw() is already called in state()
     if (el.dataset.component) {
         redraw(el.dataset.component);
