@@ -11,7 +11,7 @@ import { goTo, redraw } from "../rt/index";
 export function build(
     type: string,
     attributes?: { [key: string]: string } | string,
-    ...children: HTMLElement[]
+    ...children: HTMLElement[] | Element[] | string[]
 ) {
     let element = document.createElement(type);
     if (attributes && typeof attributes == "string") {
@@ -20,7 +20,7 @@ export function build(
         element.textContent = attributes.text;
     }
 
-    if (typeof attributes == "object") {
+    if (typeof attributes == "object" && attributes != null) {
         Object.keys(attributes).forEach(item => {
             if (item == "text") return;
             if (element.hasAttribute(item) || item in element) {
@@ -43,10 +43,18 @@ export function build(
  * @param parent Parent element to append children to
  * @param children Elements to append to parent
  */
-export function append(parent: HTMLElement, ...children: HTMLElement[]) {
+export function append(
+    parent: HTMLElement,
+    ...children: HTMLElement[] | Element[] | string[]
+) {
     const frag = document.createDocumentFragment();
-    children.forEach(i => {
-        if (i instanceof HTMLAnchorElement && i.href) {
+    children.forEach((i: HTMLElement | Element | string) => {
+        let el;
+        if (
+            i instanceof HTMLElement &&
+            i instanceof HTMLAnchorElement &&
+            i.href
+        ) {
             const url = new URL(i.href);
             if (url.origin.startsWith(window.location.origin) == true) {
                 i.addEventListener("click", evt => {
@@ -55,8 +63,11 @@ export function append(parent: HTMLElement, ...children: HTMLElement[]) {
                     goTo(evt, url);
                 });
             }
+        } else if (typeof i == "string") {
+            el = document.createTextNode(i);
         }
-        frag.appendChild(i);
+        if (el != undefined) frag.appendChild(el);
+        else frag.appendChild(i as HTMLElement);
     });
     parent.appendChild(frag);
     return parent;

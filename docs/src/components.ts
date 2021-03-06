@@ -14,7 +14,6 @@ import {
     render,
     state as s,
 } from "../../src/rt/index";
-
 import {
     Components as Cmp,
     Index,
