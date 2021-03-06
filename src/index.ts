@@ -1,3 +1,1 @@
-import * as rt from "./rt/index";
-
-export default rt;
+export * from "./rt/index";

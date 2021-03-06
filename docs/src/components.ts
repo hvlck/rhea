@@ -123,7 +123,7 @@ const Docs = () => {
     return a(
         el,
         b("h1", "Rhea"),
-        b("p", "The micro rendering framework"),
+        b("p", "The micro rendering framework."),
         a(b("div", { id: "content" }), content)
     );
 };

@@ -1,6 +1,5 @@
 // standard library utilities
-
-import { goTo, navigate, redraw } from "../rt/index";
+import { goTo, redraw } from "../rt/index";
 
 /**
  * scaffolding for easily creating an html element
