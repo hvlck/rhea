@@ -8,12 +8,13 @@ import { goTo, navigate, redraw } from "../rt/index";
  * @param text Optional text of the HTML element
  * @param attributes - Attributes to apply to the HTML element
  */
+// todo: bind <a> elements to navigate()?
 export function build(
     type: string,
     attributes?: { [key: string]: string } | string,
     ...children: HTMLElement[]
 ) {
-    let element = document.createElement(type.toString());
+    let element = document.createElement(type);
     if (attributes && typeof attributes == "string") {
         element.textContent = attributes;
     } else if (attributes && typeof attributes == "object" && attributes.text) {
@@ -27,6 +28,8 @@ export function build(
                 element.setAttribute(item, attributes[item]);
             } else if (item == "class") {
                 element.classList.add(...attributes[item].split(" "));
+            } else if (item.startsWith("data_")) {
+                element.dataset[item.replace("data_", "")] = attributes[item];
             }
         });
     }

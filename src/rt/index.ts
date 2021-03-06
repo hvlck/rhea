@@ -120,8 +120,12 @@ const removeAll = (el: HTMLCollection) => {
 export const navigate = (destination: URL) => {
     const old = window.location.pathname;
     const p = destination.pathname;
-    window.history.pushState("", "", p);
-    emit(document.body, EventType.Navigation, { old, next: p });
+    if (p != old) window.history.pushState("", "", p);
+
+    emit(document.body, EventType.Navigation, {
+        old,
+        next: p,
+    });
     render(true);
 };
 
