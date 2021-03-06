@@ -1,23 +1,29 @@
 {
     "name": "@rhea.ts/core",
-    "version": "0.0.1",
+    "version": "0.0.3-canary-3",
     "description": "the micro rendering framework",
     "repository": "https://github.com/hvlck/rhea",
     "author": "EthanJustice <47954690+EthanJustice@users.noreply.github.com>",
     "license": "GPL-3.0-or-later",
+    "types": "./types.d.ts",
+    "main": "dist/index.js",
     "files": [
-        "dist/index.js"
+        "dist/index.js",
+        "dist/src/std/index.d.ts",
+        "dist/src/rt/index.d.ts",
+        "types.d.ts"
     ],
     "bugs": {
         "url": "https://github.com/hvlck/rhea/issues"
     },
+    "sideEffects": true,
     "scripts": {
         "test": "jest",
         "doc": "yarn run typedoc --out docs src",
         "watch": "tsc --watch",
         "serve": "miniserve --index index.html ./",
         "build": "node ./build.ts",
-        "prepare": "yarn run build"
+        "prepare": "yarn run build && tsc"
     },
     "devDependencies": {
         "@types/jest": "^26.0.20",

@@ -10,10 +10,6 @@ const Cell = (props: string) => {
     return el;
 };
 
-function renderTableCell(props: string): string {
-    return `<td class="TableCell" data-text="${props}">${props}</td>`;
-}
-
 const Row = (data: TableItemState) => {
     const act = data.active ? " active" : "";
 
@@ -30,24 +26,6 @@ const Row = (data: TableItemState) => {
     return append(el, ...els);
 };
 
-function renderTableRow(data: TableItemState): string {
-    const props = data.props;
-    const active = data.active ? " active" : "";
-
-    let result = `<tr class="TableRow${active}" data-id="${data.id}">`;
-
-    result += renderTableCell("#" + data.id);
-    for (let i = 0; i < props.length; i++) {
-        result += renderTableCell(props[i]);
-    }
-
-    return result + `</tr>`;
-}
-
-interface TableState {
-    items: Array<TableItemState>;
-}
-
 const Table = (data: TableState) => {
     const el = build("table", { class: "Table" });
     const items = data.items;
@@ -60,23 +38,6 @@ const Table = (data: TableState) => {
     return append(el, ...els);
 };
 
-function renderTable(data: TableState): string {
-    const items = data.items;
-
-    let result = `<table class="Table"><tbody>`;
-
-    for (let i = 0; i < items.length; i++) {
-        result += renderTableRow(items[i]);
-    }
-
-    return result + `</tbody></table>`;
-}
-
-interface AnimBoxState {
-    id: number;
-    time: number;
-}
-
 const AnimBox = (props: AnimBoxState) => {
     return build("div", {
         class: "AnimBox",
@@ -86,18 +47,6 @@ const AnimBox = (props: AnimBoxState) => {
             `background:rgba(0,0,0,${0.5 + (props.time % 10) / 10})`,
     });
 };
-
-function renderAnimBox(props: AnimBoxState): string {
-    const style =
-        `border-radius:${props.time % 10}px;` +
-        `background:rgba(0,0,0,${0.5 + (props.time % 10) / 10})`;
-
-    return `<div class="AnimBox" style="${style}" data-id="${props.id}"></div>`;
-}
-
-interface AnimState {
-    items: Array<AnimBoxState>;
-}
 
 const Anim = (props: AnimState) => {
     const items = props.items;
@@ -111,30 +60,9 @@ const Anim = (props: AnimState) => {
     return append(el, ...els);
 };
 
-function renderAnim(props: AnimState): string {
-    const items = props.items;
-
-    let result = `<div class="Anim">`;
-    for (let i = 0; i < items.length; i++) {
-        result += renderAnimBox(items[i]);
-    }
-
-    return result + `</div>`;
-}
-
-interface TreeNodeState {
-    id: number;
-    container: boolean;
-    children: Array<TreeNodeState>;
-}
-
 const TreeLeaf = (props: TreeNodeState) => {
     return build("li", { class: "TreeLeaf", text: props.id.toString() });
 };
-
-function renderTreeLeaf(props: TreeNodeState): string {
-    return `<li class="TreeLeaf">${props.id}</li>`;
-}
 
 const TreeNode = (props: TreeNodeState): HTMLElement => {
     const el = build("ul", { class: "TreeNode" });
@@ -148,26 +76,9 @@ const TreeNode = (props: TreeNodeState): HTMLElement => {
     return append(el, ...els);
 };
 
-function renderTreeNode(data: TreeNodeState): string {
-    let result = `<ul class="TreeNode">`;
-    for (let i = 0; i < data.children.length; i++) {
-        const n = data.children[i];
-        result += n.container ? renderTreeNode(n) : renderTreeLeaf(n);
-    }
-    return (result += `</ul>`);
-}
-
-interface TreeState {
-    root: TreeNodeState;
-}
-
 const Tree = (props: TreeState) => {
     return append(build("div", { class: "Tree" }), TreeNode(props.root));
 };
-
-function renderTree(props: TreeState): string {
-    return `<div class="Tree">${renderTreeNode(props.root)}</div>`;
-}
 
 const Main = (data: AppState) => {
     const l = data && data.location;
@@ -183,20 +94,6 @@ const Main = (data: AppState) => {
 
     return el;
 };
-
-function renderMain(data: AppState): string {
-    const location = data && data.location;
-
-    let result = `<div class="Main">`;
-    if (location === "table") {
-        result += renderTable(data.table);
-    } else if (location === "anim") {
-        result += renderAnim(data.anim);
-    } else if (location === "tree") {
-        result += renderTree(data.tree);
-    }
-    return result + `</div>`;
-}
 
 //@ts-ignore
 uibench.init("rhea", "0.0.2");
@@ -218,7 +115,7 @@ window.addEventListener("DOMContentLoaded", () => {
     uibench.run(
         state => {
             let container = a as HTMLElement;
-            container.innerHTML = renderMain(state);
+            container.appendChild(Main(state));
             if (state.location === "table") {
                 const cells = container.querySelectorAll(".TableCell");
                 for (let i = 0; i < cells.length; i++) {
