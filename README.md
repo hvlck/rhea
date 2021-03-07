@@ -2,6 +2,9 @@
 
 the micro rendering framework
 
++ [Tour](https://hvlck.github.io/rhea/tour/)
++ [Docs](./docs/index.md)
+
 ## Design
 
 The following is early planning and psuedo-code.

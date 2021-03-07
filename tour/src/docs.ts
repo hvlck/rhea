@@ -1,5 +1,7 @@
 import { build as b, append as a } from "../../src/std/index";
 
+// todo: rewrite in tsx
+
 export const Index = () => {
     const el = b("div");
     return a(
