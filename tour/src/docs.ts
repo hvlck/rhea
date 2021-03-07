@@ -15,13 +15,37 @@ Rhea is also primarily feature-complete at this point. It makes a point of being
         b("h2", "Features"),
         a(
             b("ul"),
-            b("li", "Size: 2.99 KB before gzipping"),
+            b(
+                "li",
+                "Size: 1.9kB minified + gzipped (",
+                b(
+                    "a",
+                    {
+                        href: "https://bundlephobia.com/result?p=@rhea.ts/core",
+                    },
+                    "view on bundlephobia"
+                ),
+                b("span", ")")
+            ),
             b("li", "Simple and minimal API"),
-            b("li", "Blazing fast for all your performance needs")
+            b(
+                "li",
+                "Blazing fast for all your performance needs (",
+                b("a", { href: "" }, "benchmarks"),
+                b("span", ")")
+            )
         ),
         b(
             "p",
-            "Please note that this site is just for getting a quick overview of Rhea, and is not the complete documentation."
+            "Please note that this site is just for getting a quick overview of Rhea, and is not the complete documentation. ",
+            b(
+                "a",
+                {
+                    href:
+                        "https://github.com/hvlck/rhea/tree/main/docs/index.md",
+                },
+                "The complete documentation can be found here."
+            )
         ),
         b("nav", "", b("a", { href: "/runtime", text: "Next: Runtime" }))
     );
@@ -63,7 +87,7 @@ register(Component) // registers the component in rhea's component list`
             "",
             a(
                 b("p", "Rhea's "),
-                b("a", { text: "standard library", href: "/std#build" }),
+                b("a", { text: "standard library", href: "/std" }),
                 b(
                     "span",
                     " comes with a helper function to generate HTML elements to return."

@@ -2,6 +2,8 @@
 
 the micro rendering framework
 
+{{ table of contents }}
+
 + [Tour](https://hvlck.github.io/rhea/tour/)
 + [Docs](./docs/index.md)
 
@@ -17,6 +19,7 @@ Various things I would like to experiment with before fleshing out design:
 + actor model?
   + pub/sub channels using window events?
     + BroadcastChannel/Channel Messaging API?
++ [stream() - Mithril.js](https://mithril.js.org/stream.html)
 
 ## Roadmap
 
@@ -37,6 +40,17 @@ Various things I would like to experiment with before fleshing out design:
 + memoization (cached elements), similar to React.memo()
 + ssr framework
   + may be part of `rheac`
++ tests
+  + large amounts of props
+  + large amounts of component children
+    + this is to test whether calling the `Component`-implementing function on every event/state change is a viable idea
++ switch route mounting to [`expressjs`-style functions](https://expressjs.com/en/guide/routing.html)
++ find alternative to Function.name because of tree-shaking
++ `state` api
+  + `clear()` - clears state
+  + `lock()` - locks state (Object.freeze)
+  + `unlock()` - unlocks state
+  + `updated(callbackfn | Set<Component>)` - performs specified callback function or redraws given components whenever state is updated
 
 ## Scratchpad
 

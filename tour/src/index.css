@@ -99,6 +99,7 @@ nav div {
 nav div {
     justify-content: center;
     min-width: 50%;
+    margin: 0 !important;
 }
 
 nav div a {
