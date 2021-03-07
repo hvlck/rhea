@@ -1,2 +1,3 @@
-export * from "./dist/src/rt/index";
-export * from "./dist/src/std/index";
+export * from "./dist/types/src/rt/index";
+export * from "./dist/types/src/std/index";
+export * from "./dist/types/src/index";

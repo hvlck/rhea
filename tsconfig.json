@@ -72,7 +72,6 @@
         "./src/index.ts",
         "./src/std/index.ts",
         "./src/rt/index.ts",
-        "examples/test.tsx",
         "src/jsx.d.ts",
         "examples/todomvc/index.ts"
     ]

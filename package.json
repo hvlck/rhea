@@ -1,14 +1,15 @@
 {
     "name": "@rhea.ts/core",
-    "version": "0.0.3-canary-4",
+    "version": "0.0.3-canary-6",
     "description": "the micro rendering framework",
     "repository": "https://github.com/hvlck/rhea",
     "author": "EthanJustice <47954690+EthanJustice@users.noreply.github.com>",
     "license": "GPL-3.0-or-later",
     "types": "./types.d.ts",
-    "main": "dist/index.js",
+    "main": "dist/rhea.es2017.js",
     "files": [
-        "dist/index.js",
+        "dist/rhea.es2017.js",
+        "dist/rhea.es2017.js.map",
         "dist/src/std/index.d.ts",
         "dist/src/rt/index.d.ts",
         "types.d.ts"
@@ -21,17 +22,20 @@
         "test": "jest",
         "doc": "yarn run typedoc --out docs src",
         "watch": "tsc --watch",
-        "build": "node ./build.ts",
         "serve": "miniserve --index index.html ./",
-        "bundle": "webpack --mode=development",
-        "bundle:release": "webpack --mode=production",
-        "prepare": "yarn run bundle:release && tsc"
+        "build": "npx rollup -c",
+        "build:release": "tsc --noEmit false --declaration true --emitDeclarationOnly true --outDir dist/types && rollup -c",
+        "prepare": "yarn run build:release && tsc"
     },
     "devDependencies": {
+        "@rollup/plugin-node-resolve": "^11.2.0",
+        "@rollup/plugin-typescript": "^8.2.0",
         "@types/jest": "^26.0.20",
         "jest": "^26.6.3",
+        "rollup": "^2.40.0",
         "ts-jest": "^26.5.2",
         "ts-node": "^9.1.1",
+        "tslib": "^2.1.0",
         "typedoc": "^0.20.28",
         "typescript": "^4.1.5"
     }

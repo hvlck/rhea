@@ -5,6 +5,7 @@ require("esbuild")
         outfile: "dist/index.js",
         sourcemap: false,
         keepNames: true,
-        target: "es2020",
+        minify: true,
+        target: ["chrome58", "firefox57", "safari11", "edge16"],
     })
     .catch(() => process.exit(1));

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@rhea.ts/core@^0.0.3-canary-3":
-  version "0.0.3-canary-3"
-  resolved "https://registry.yarnpkg.com/@rhea.ts/core/-/core-0.0.3-canary-3.tgz#7243235daef152e0a2e1387c92e26df17f37741d"
-  integrity sha512-B5HzupdAxdkrYe1ML07qgOfjjRMqbL/Xm2Rdlvs7vpQ52oU0H7bTR1xYYF2looxH0qQDcj4UEaTYuBI3EowLkA==
+"@rhea.ts/core@0.0.3-canary-6":
+  version "0.0.3-canary-6"
+  resolved "https://registry.yarnpkg.com/@rhea.ts/core/-/core-0.0.3-canary-6.tgz#56f8450aee2ba2c22f54504400757073a98d188c"
+  integrity sha512-udNBHBYGDeoVru4kwhUarEp6W/9gcBDs7QFVv3uB6q+wfj9IEiiV1sVt9Di9Ub7kuLoTqjyEZDQbgAkinald1Q==
 
 arg@^4.1.0:
   version "4.1.3"

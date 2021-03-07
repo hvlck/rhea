@@ -20,15 +20,20 @@ Various things I would like to experiment with before fleshing out design:
 + ~~dynamic path segments~~
 + ~~state~~
 + some way to use CSS
+  + maybe use `<template>` for scoping
 + testing framework
-+ ~~method to disable auto-linking on `<a>` elements~~
-  + `el.dataset.bound`
 + more events
   + global re-renders
   + first initialisation
-+ JSX support
 + i18n internationalisation
 + docs
++ global `state` object to be passed to `history.state`
++ maybe individual `state` objects for each route
++ easy interface for use as PWAs
++ mixins/extensions for various internal events
++ memoization (cached elements), similar to React.memo()
++ ssr framework
+  + may be part of `rheac`
 
 ## Scratchpad
 

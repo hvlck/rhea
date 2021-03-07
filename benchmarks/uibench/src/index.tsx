@@ -1,4 +1,4 @@
-import { build, render, append } from "@rhea.ts/core";
+import { build, append } from "@rhea.ts/core";
 
 const Cell = (props: string) => {
     const el = build("td", {
@@ -95,15 +95,10 @@ const Main = (data: AppState) => {
     return el;
 };
 
-//@ts-ignore
-uibench.init("rhea", "0.0.2");
+uibench.init("Rhea", "0.0.2");
 
 function handleClick(e: MouseEvent): void {
     if ((e.target as HTMLElement).className === "TableCell") {
-        console.log(
-            "Click",
-            (e.target as HTMLElement).getAttribute("data-text")
-        );
         e.preventDefault();
         e.stopPropagation();
     }
@@ -112,10 +107,11 @@ function handleClick(e: MouseEvent): void {
 window.addEventListener("DOMContentLoaded", () => {
     const a = document.querySelector("#App");
 
+    const container = a as HTMLElement;
     uibench.run(
         state => {
-            let container = a as HTMLElement;
             container.appendChild(Main(state));
+
             if (state.location === "table") {
                 const cells = container.querySelectorAll(".TableCell");
                 for (let i = 0; i < cells.length; i++) {
