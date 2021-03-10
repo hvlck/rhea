@@ -3,7 +3,7 @@ import {
     build as b,
     ComponentEventType,
     event as e,
-    head as h,
+    head,
 } from "../src/std/index";
 import {
     Component,
@@ -47,8 +47,8 @@ test("component register append() works", () => {
 
     const nav = Nav();
 
-    const m = jest.fn(a);
-    m(nav, b("a", "Links"), b("a", "More items"));
+    const m = jest.fn(() => a(nav, b("a", "Links"), b("a", "More items")));
+    m();
 
     expect(m).toHaveBeenCalled();
     expect(m).toReturn();
@@ -105,4 +105,33 @@ test("component event() subscriber and state works", () => {
     btn.click();
     expect(btn.textContent).toBe("Clicks: 2");
     expect(cb).toBe(2);
+});
+
+test("utility head() appends nodes successfully", () => {
+    const len = document.head.children.length;
+    head(b("title", "This is a test title"));
+
+    expect(document.title).toBe("This is a test title");
+    expect(document.title).toBeDefined();
+    expect(document.head.children.length).toBe(len + 1);
+});
+
+test("utility head() replaces nodes successfully", () => {
+    expect(document.head.children.length).toBe(0);
+
+    // setup
+    document.head.appendChild(
+        b("link", { rel: "stylesheet", type: "text/css", href: "/index.css" })
+    );
+
+    expect(document.head.children.length).toBe(1);
+
+    document.head.appendChild(
+        b("link", { rel: "stylesheet", type: "text/css", href: "/index.css" })
+    );
+
+    expect(document.head.children.length).toBe(1);
+
+    const el = document.head.firstElementChild;
+    expect(el?.getAttribute("href")).toBe("/index.css");
 });

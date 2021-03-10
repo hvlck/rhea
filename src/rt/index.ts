@@ -21,7 +21,11 @@ export const State: Map<string, StateFunction> = new Map();
  * @param component The component to retreive state from
  * @param state The initial state structure
  */
-export const state = (component: string, state: any = {}) => {
+export const state = (component: string | Component, state: any = {}) => {
+    if (typeof component == "function") {
+        component = component.name.toLowerCase();
+    }
+
     const c = State.get(component);
     if (c) {
         return [c.state, c.set];
@@ -71,14 +75,16 @@ window.addEventListener("popstate", () => {
  * the name with the route, e.g. `/:nav` and `/about:nav`
  * @param element The function that returns an HTMLElement
  */
-export const register = (element: Component) => {
-    const n = element.name.toLowerCase();
-    if (Components.get(n)) {
-        throw Error(`component ${n} has already been defined!`);
-    } else {
-        Components.set(element.name.toLowerCase(), element);
-        return true;
-    }
+export const register = (...elements: Component[]) => {
+    return elements.map(element => {
+        const n = element.name.toLowerCase();
+        if (Components.get(n)) {
+            throw Error(`component ${n} has already been defined!`);
+        } else {
+            Components.set(element.name.toLowerCase(), element);
+            return true;
+        }
+    });
 };
 
 /**
@@ -95,7 +101,7 @@ export const mount = (components: Set<Component>, path: string | RegExp) => {
     Index.set(path, cmp);
 
     const r = {
-        add: (route: string) => {
+        add: (route: string | RegExp) => {
             Index.set(route, cmp);
             return r;
         },
@@ -213,7 +219,7 @@ export const render = (prev = true) => {
     components?.forEach(i => {
         const cmp = Components.get(i);
         if (cmp) {
-            frag.appendChild(hydrate(cmp, i));
+            frag.appendChild(hydrate(cmp));
             return;
         }
     });
@@ -231,7 +237,7 @@ export const render = (prev = true) => {
  * @param i The function to generate the component from
  * @param name Name of the component
  */
-const hydrate = (i: Component, name: string) => {
+const hydrate = (i: Component) => {
     const el: HTMLElement = i?.call(null);
 
     const kids: HTMLElement[] = Array.from(el.children).map(
@@ -265,7 +271,7 @@ const hydrate = (i: Component, name: string) => {
         });
     }
 
-    el.dataset.component = name;
+    el.dataset.component = i.name.toLowerCase();
     return el;
 };
 
@@ -273,11 +279,18 @@ const hydrate = (i: Component, name: string) => {
  * Re-renders a single component
  * @param component The component to redraw
  */
-export const redraw = (component: string) => {
+export const redraw = (component: string | Component) => {
     const el = document.body.querySelector(`*[data-component="${component}"]`);
+    if (typeof component == "function") {
+        component = component.name.toLowerCase();
+    }
     const cmp = Components.get(component);
     if (el && cmp) {
-        el.replaceWith(hydrate(cmp, component));
+        el.replaceWith(hydrate(cmp));
+    } else if (cmp && !el) {
+        throw Error(
+            `component ${component} registered but is not present in body`
+        );
     } else {
         throw Error(
             `failed to get component ${component}, does not exist in body`

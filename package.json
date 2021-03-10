@@ -12,7 +12,8 @@
         "dist/rhea.es2017.js.map",
         "dist/src/std/index.d.ts",
         "dist/src/rt/index.d.ts",
-        "types.d.ts"
+        "types.d.ts",
+        "src/jsx.d.ts"
     ],
     "bugs": {
         "url": "https://github.com/hvlck/rhea/issues"
@@ -25,7 +26,7 @@
         "serve": "miniserve --index index.html ./",
         "build": "npx rollup -c",
         "build:release": "tsc --noEmit false --declaration true --emitDeclarationOnly true --outDir dist/types && rollup -c",
-        "prepare": "yarn run build:release && tsc"
+        "prepare": "yarn run build:release"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^11.2.0",

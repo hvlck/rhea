@@ -132,6 +132,7 @@ export function event(
  * Updates the document's `head` with the provided elements. Note that the first similar element
  * @param el The document.head elements to update
  */
+// todo: better head diffing
 export function head(...el: HTMLHeadElement[]) {
     el.forEach(i => {
         let selector = "";
