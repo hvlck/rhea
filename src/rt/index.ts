@@ -4,16 +4,18 @@ export type Component = () => HTMLElement;
 /**
  * Wrapper over a state manipulator.
  */
-interface StateFunction {
-    set: (updated: any) => any;
-    state: any;
+interface StateFunction<T> {
+    set: (state: T, noRedraw?: boolean) => T;
+    privateState: T;
+    readonly state: T;
+    component: string | Component;
 }
 
 /**
  * Global state object. Each key corresponds to a component. It is recommended that you don't set this directly and let
  * rhea manage it for you.
  */
-export const State: Map<string, StateFunction> = new Map();
+export const State: Map<string, StateFunction<any>> = new Map();
 
 // possibly change signature so that to get state component would have to call s.call(Component, initialState)?
 /**
@@ -21,26 +23,60 @@ export const State: Map<string, StateFunction> = new Map();
  * @param component The component to retreive state from
  * @param state The initial state structure
  */
-export const state = (component: string | Component, state: any = {}) => {
+export const state = <T>(
+    component: string | Component,
+    state?: T
+): [T, (state: T, noRedraw?: boolean) => T] => {
     if (typeof component == "function") {
         component = component.name.toLowerCase();
     }
 
     const c = State.get(component);
+    if (c && state) {
+        throw new Error(
+            `cannot set state initialiser for component ${component} twice`
+        );
+    }
+
     if (c) {
         return [c.state, c.set];
-    } else {
-        const s = <StateFunction>{
+    } else if (state != undefined) {
+        let s = <StateFunction<T>>{
             component,
-            state,
-            set: function (updated: any) {
-                s.state = updated;
-                redraw(component);
-                return s.state;
+            privateState: { ...state },
+            get state() {
+                return s.privateState;
+            },
+            set: (updated: T, noRedraw?: boolean) => {
+                s.privateState = updated;
+                if (noRedraw == false || noRedraw == undefined)
+                    redraw(component);
+
+                return s.privateState;
             },
         };
+
+        // broken at the moment
+        // each property of the `state` passed as the return value have to be updated when called by setting a getter method
+        // this hits the top of the stack at the moment
+
+        for (const property in s.state) {
+            console.log(property.toString(), property, s.state[property]);
+            Object.defineProperty(s.state, property.toString(), {
+                get() {
+                    return property;
+                },
+            });
+        }
+
+        Object.preventExtensions(s);
+
         State.set(component, s);
         return [s.state, s.set];
+    } else {
+        throw Error(
+            `no initial state defined when initialising state for ${component}`
+        );
     }
 };
 
@@ -76,15 +112,17 @@ window.addEventListener("popstate", () => {
  * @param element The function that returns an HTMLElement
  */
 export const register = (...elements: Component[]) => {
-    return elements.map(element => {
-        const n = element.name.toLowerCase();
-        if (Components.get(n)) {
-            throw Error(`component ${n} has already been defined!`);
-        } else {
-            Components.set(element.name.toLowerCase(), element);
-            return true;
-        }
-    });
+    return elements
+        .map(element => {
+            const n = element.name.toLowerCase();
+            if (Components.get(n)) {
+                throw Error(`component ${n} has already been defined!`);
+            } else {
+                Components.set(element.name.toLowerCase(), element);
+                return true;
+            }
+        })
+        .some(i => (i == false ? false : true));
 };
 
 /**
@@ -166,19 +204,6 @@ export const goTo = (evt: Event, url: URL) => {
 
     return false;
 };
-
-// shim for requestAnimationFrame
-const ra = window.requestAnimationFrame;
-window.requestAnimationFrame = (function () {
-    return (
-        ra ||
-        window.webkitRequestAnimationFrame ||
-        function (callback) {
-            window.setTimeout(callback, 1000 / 60);
-        } ||
-        0
-    );
-})();
 
 /**
  * Returns a component list for the matching URL path. Note that exact string matches have higher precedence

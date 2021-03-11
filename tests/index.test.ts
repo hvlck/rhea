@@ -1,6 +1,7 @@
 import {
     Component,
     Components,
+    event,
     mount,
     register,
     render,
@@ -8,22 +9,37 @@ import {
 } from "../src/rt";
 import { build } from "../src/std";
 
-// broken as JSDOM doesn't support requestAnimationFrame()
+import "jest";
+
+global.requestAnimationFrame = function (fn: Function) {
+    fn(1);
+    return 0;
+};
+
 test("state() functions", () => {
+    const [st, set] = state("t", { clicks: 0 });
     const T = () => {
         const el = build("p");
+        event(el, "click", () => set({ clicks: st.clicks + 1 }));
+
         return el;
     };
+
     register(T);
     mount(new Set<Component>().add(T), "/");
-    render();
 
-    const [st, set] = state("t", { clicks: 0 });
-    const s = () => set({ clicks: st.clicks + 1 });
+    const r = render();
+    expect(r).toBe(true);
 
-    s();
+    const el = document.body.querySelector("*[data-component]") as HTMLElement;
+    expect(el).not.toBeNull();
+    el.click();
+
+    console.log(st, st.clicks, state("t"));
+
     expect(st.clicks).toBe(1);
     expect(st).not.toBeNull();
+    //@ts-expect-error
     expect(st.random).toBeNull();
 });
 

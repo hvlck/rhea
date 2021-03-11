@@ -14,6 +14,13 @@ import {
     state as s,
 } from "../src/rt/index";
 
+import "jest";
+
+global.requestAnimationFrame = function (fn: Function) {
+    fn(1);
+    return 0;
+};
+
 test("component register build() works", () => {
     const Heading: Component = () => {
         const el = b("h1", {
@@ -63,7 +70,6 @@ test("component register append() works", () => {
     expect(nav.lastElementChild).toBeInstanceOf(Element);
 });
 
-// test is broken for now as JSDOM doesn't support requestAnimationFrame
 test("component event() subscriber and state works", () => {
     const Button: Component = () => {
         const [st, set] = s("button", { clicks: 0 });
@@ -71,7 +77,6 @@ test("component event() subscriber and state works", () => {
         const el = b("button", "Clicks: " + st.clicks);
         e(el, ComponentEventType.Click, function () {
             set({ clicks: st.clicks + 1 });
-            redraw("button");
         });
 
         return el;
@@ -117,6 +122,8 @@ test("utility head() appends nodes successfully", () => {
 });
 
 test("utility head() replaces nodes successfully", () => {
+    // normalisation since jest doesn't reset DOM between tests
+    Array.from(document.head.children).forEach(i => i.remove());
     expect(document.head.children.length).toBe(0);
 
     // setup

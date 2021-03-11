@@ -21,6 +21,8 @@ const Test = () => {
     return t;
 };
 
-const t = <T>(name: string, fn: (testing: Test) => void) => {};
+const t = (name: string, fn: (testing: Test) => void) => {
+    console.log(name, fn);
+};
 
 export default t;
