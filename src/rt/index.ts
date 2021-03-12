@@ -1,21 +1,19 @@
-// rhea runtime manager
+// rhea runtime
 export type Component = () => HTMLElement;
 
 /**
  * Wrapper over a state manipulator.
  */
-interface StateFunction<T> {
-    set: (state: T, noRedraw?: boolean) => T;
-    privateState: T;
-    readonly state: T;
-    component: string | Component;
+interface StateFunction {
+    set: (updated: any) => any;
+    state: any;
 }
 
 /**
  * Global state object. Each key corresponds to a component. It is recommended that you don't set this directly and let
  * rhea manage it for you.
  */
-export const State: Map<string, StateFunction<any>> = new Map();
+export const State: Map<string, StateFunction> = new Map();
 
 // possibly change signature so that to get state component would have to call s.call(Component, initialState)?
 /**
@@ -23,54 +21,24 @@ export const State: Map<string, StateFunction<any>> = new Map();
  * @param component The component to retreive state from
  * @param state The initial state structure
  */
-export const state = <T>(
-    component: string | Component,
-    state?: T
-): [T, (state: T, noRedraw?: boolean) => T] => {
+export const state = (component: string | Component, state: any = {}) => {
     if (typeof component == "function") {
         component = component.name.toLowerCase();
     }
 
     const c = State.get(component);
-    if (c && state) {
-        throw new Error(
-            `cannot set state initialiser for component ${component} twice`
-        );
-    }
-
     if (c) {
         return [c.state, c.set];
     } else if (state != undefined) {
-        let s = <StateFunction<T>>{
+        const s = <StateFunction>{
             component,
-            privateState: { ...state },
-            get state() {
-                return s.privateState;
-            },
-            set: (updated: T, noRedraw?: boolean) => {
-                s.privateState = updated;
-                if (noRedraw == false || noRedraw == undefined)
-                    redraw(component);
-
-                return s.privateState;
+            state,
+            set: function (updated: any) {
+                s.state = updated;
+                redraw(component);
+                return s.state;
             },
         };
-
-        // broken at the moment
-        // each property of the `state` passed as the return value have to be updated when called by setting a getter method
-        // this hits the top of the stack at the moment
-
-        for (const property in s.state) {
-            console.log(property.toString(), property, s.state[property]);
-            Object.defineProperty(s.state, property.toString(), {
-                get() {
-                    return property;
-                },
-            });
-        }
-
-        Object.preventExtensions(s);
-
         State.set(component, s);
         return [s.state, s.set];
     } else {
@@ -127,25 +95,15 @@ export const register = (...elements: Component[]) => {
 
 /**
  * Registers components for a given route
- * @param paths The paths you want to register the components for
- * @param components The components you want to register on the path
+ * @param route The paths you want to register the component for
+ * @param page The components you want to register on the path
  */
-export const mount = (components: Set<Component>, path: string | RegExp) => {
-    // maps given components into their internal names, which is the function name in lowercase
-    const s = Array.from(components).map(i => i.name?.toLowerCase());
-
-    const cmp: Set<string> = new Set();
-    s.forEach(i => cmp.add(i));
-    Index.set(path, cmp);
-
-    const r = {
-        add: (route: string | RegExp) => {
-            Index.set(route, cmp);
-            return r;
-        },
-    };
-
-    return r;
+export const mount = <T extends Object>(
+    route: string | RegExp,
+    page: (state?: T) => Component
+) => {
+    Index.set(route, new Set<string>().add(page.call(null).name.toLowerCase()));
+    return true;
 };
 
 // removes all children from the given element

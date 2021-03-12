@@ -51,6 +51,9 @@ Various things I would like to experiment with before fleshing out design:
   + `lock()` - locks state (Object.freeze)
   + `unlock()` - unlocks state
   + `updated(callbackfn | Set<Component>)` - performs specified callback function or redraws given components whenever state is updated
+  + state guards
+    + value checking in proxy stage
++ support for appending Components as children in `std.build()`
 
 ## Scratchpad
 

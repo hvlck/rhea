@@ -129,19 +129,9 @@ const Docs = () => {
 
 register(Docs);
 
-const docsComp: Set<Component> = new Set();
-docsComp.add(Nav).add(Docs);
-mount(docsComp, /\/+./);
-
-const navComponents: Set<Component> = new Set();
-navComponents.add(Nav).add(Docs);
-
-mount(navComponents, "/")
-    .add("/")
-    .add("/components")
-    .add("/runtime")
-    .add("/router")
-    .add("/state");
+mount(/.+/, () => {
+    return Docs;
+});
 
 window.addEventListener("load", () => render());
 document.body.addEventListener("global-render", () => {}, { once: true });

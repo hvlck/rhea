@@ -1,3 +1,5 @@
+// jsx support
+
 export declare global {
     export declare namespace JSX {
         export interface IntrinsicElements {

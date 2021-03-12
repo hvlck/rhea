@@ -12,16 +12,16 @@ export const T = () => {
 };
 register(T);
 
-export const A = () => {
+export const About = () => {
     return (
         <div>
             <h2>About</h2>
         </div>
     ) as HTMLElement;
 };
-register(A);
+register(About);
 
-mount(new Set<Component>().add(T).add(A), "/about");
+mount(new Set<Component>().add(T).add(About), "/about");
 mount(new Set<Component>().add(T), "/");
 
 render();
