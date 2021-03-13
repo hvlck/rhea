@@ -1,19 +1,22 @@
 // rhea runtime
 export type Component = () => HTMLElement;
 
-/**
- * Wrapper over a state manipulator.
- */
-interface StateFunction {
-    set: (updated: any) => any;
-    state: any;
+interface StateFunction<T extends Object> {
+    set: (updated: T) => T;
+    component: string;
+    st: T;
+    lock: () => void;
+    clear: () => void;
+    unlock: () => void;
+    updated: (name: string, cb: Function | Set<Component>) => StateFunction<T>;
+    subscribers: Map<string, Function>;
 }
 
 /**
  * Global state object. Each key corresponds to a component. It is recommended that you don't set this directly and let
  * rhea manage it for you.
  */
-export const State: Map<string, StateFunction> = new Map();
+export const State: Map<string, StateFunction<any>> = new Map();
 
 // possibly change signature so that to get state component would have to call s.call(Component, initialState)?
 /**
@@ -21,30 +24,71 @@ export const State: Map<string, StateFunction> = new Map();
  * @param component The component to retreive state from
  * @param state The initial state structure
  */
-export const state = (component: string | Component, state: any = {}) => {
+export const state = <T extends Object>(
+    component: string | Component,
+    state?: T
+): StateFunction<T> => {
     if (typeof component == "function") {
         component = component.name.toLowerCase();
     }
 
     const c = State.get(component);
     if (c) {
-        return [c.state, c.set];
+        return c;
     } else if (state != undefined) {
-        const s = <StateFunction>{
+        const st: StateFunction<T> = {
             component,
-            state,
-            set: function (updated: any) {
-                s.state = updated;
-                redraw(component);
-                return s.state;
+            st: {
+                set(prop: string) {
+                    throw Error(
+                        `do not set state values on components directly! you tried to set property ${prop} on component ${component}`
+                    );
+                },
+                ...state,
+            },
+            lock: () => {
+                st.st = Object.freeze(st.st);
+            },
+            clear: () => {
+                Object.keys(st.st).forEach(i => delete st.st[i]);
+            },
+            unlock: () => {
+                JSON.parse(JSON.stringify(state));
+                return st;
+            },
+            subscribers: new Map(),
+            updated: (
+                name: string,
+                cb: Function | Set<Component> | Component
+            ) => {
+                if (typeof cb == "function") st.subscribers.set(name, cb);
+                else {
+                    st.subscribers.set(name, () =>
+                        cb.forEach(cmp => redraw(cmp))
+                    );
+                }
+
+                return st;
+            },
+            set: (state: T, rd = true) => {
+                st.st = Object.assign({}, state);
+                st.subscribers.forEach(i => i.call(null, st.st));
+
+                if (rd == true) redraw(component);
+
+                State.set(st.component, st);
+                return st.st;
             },
         };
-        State.set(component, s);
-        return [s.state, s.set];
-    } else {
+
+        State.set(component, st);
+        return st;
+    } else if (state == undefined && !c) {
         throw Error(
             `no initial state defined when initialising state for ${component}`
         );
+    } else {
+        throw Error("failed to provide necessary arguments in calling state()");
     }
 };
 
@@ -98,7 +142,7 @@ export const register = (...elements: Component[]) => {
  * @param route The paths you want to register the component for
  * @param page The components you want to register on the path
  */
-export const mount = <T extends Object>(
+export const mount = <T extends { [key: string]: any }>(
     route: string | RegExp,
     page: (state?: T) => Component
 ) => {
@@ -134,15 +178,19 @@ export const navigate = (destination: URL) => {
 /**
  * Note that the render event will be scoped to the element is called on, while the before/after page change events
  * are called on `document.body`
+ * @param Initialized Fired when a component is initialised for the first time; note that this is called on `document.body` and its `event.detail` object contains a `component` key
  * @param Navigation Fired immediately after history.pushState() is called
  * @param Render The render event, called whenever a page is rendered.
+ * @param Redraw Fired on a component when that component has been redrawn
  * @param GlobalRender Called on `document.body` whenever the page is changed and triggers a complete rerender.
  * @param BeforePageChange Called before a page is changed using the History API
  * @param AfterPageChange Called after a page is changed and rendered.
  */
 export enum EventType {
+    Initialized = "initialized",
     Navigation = "navigation",
     Render = "render",
+    Redraw = "redraw",
     GlobalRender = "global-render",
     BeforePageChange = "before-page-change",
     AfterPageChange = "after-page-change",
@@ -195,7 +243,7 @@ export const render = (prev = true) => {
 
     const components = path();
     if (components == false)
-        throw Error(`${window.location.pathname} is an invalid route`);
+        throw Error(`${window.location.pathname} is not a registered route`);
 
     let frag = new DocumentFragment();
 
@@ -204,6 +252,10 @@ export const render = (prev = true) => {
         if (cmp) {
             frag.appendChild(hydrate(cmp));
             return;
+        } else {
+            throw Error(
+                `component ${i} is not registered in the component registry`
+            );
         }
     });
 
@@ -222,6 +274,9 @@ export const render = (prev = true) => {
  */
 const hydrate = (i: Component) => {
     const el: HTMLElement = i?.call(null);
+    emit(document.body, EventType.Initialized, {
+        component: i.name.toLowerCase(),
+    });
 
     const kids: HTMLElement[] = Array.from(el.children).map(
         el => el as HTMLElement
@@ -270,6 +325,7 @@ export const redraw = (component: string | Component) => {
     const cmp = Components.get(component);
     if (el && cmp) {
         el.replaceWith(hydrate(cmp));
+        emit(el as HTMLElement, EventType.Redraw);
     } else if (cmp && !el) {
         throw Error(
             `component ${component} registered but is not present in body`

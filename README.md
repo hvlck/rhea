@@ -27,12 +27,12 @@ Various things I would like to experiment with before fleshing out design:
 + ~~state~~
 + some way to use CSS
   + maybe use `<template>` for scoping
+  + shadow dom?
 + testing framework
 + more events
-  + global re-renders
-  + first initialisation
+  + ~~global re-renders~~
+  + ~~first initialisation~~
 + i18n internationalisation
-+ docs
 + global `state` object to be passed to `history.state`
 + maybe individual `state` objects for each route
 + easy interface for use as PWAs
@@ -54,6 +54,8 @@ Various things I would like to experiment with before fleshing out design:
   + state guards
     + value checking in proxy stage
 + support for appending Components as children in `std.build()`
++ debug builds
+  + may write as extension to core framework
 
 ## Scratchpad
 

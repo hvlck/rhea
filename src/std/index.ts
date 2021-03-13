@@ -1,5 +1,5 @@
 // standard library utilities
-import { goTo, redraw } from "../rt/index";
+import { Component, goTo, redraw } from "../rt/index";
 
 /**
  * scaffolding for easily creating an html element
@@ -11,7 +11,7 @@ import { goTo, redraw } from "../rt/index";
 export function build(
     type: string,
     attributes?: { [key: string]: string } | string,
-    ...children: HTMLElement[] | Element[] | string[]
+    ...children: HTMLElement[] | Element[] | string[] | Component[]
 ) {
     let element = document.createElement(type);
     if (attributes && typeof attributes == "string") {
@@ -33,7 +33,16 @@ export function build(
         });
     }
 
-    if (children.length >= 1) append(element, ...children);
+    let kids: HTMLElement[] | Element[] | string[];
+    if (children && typeof children[0] == "function") {
+        kids = (children as Component[]).map((i: Component) => {
+            return i.call(null);
+        });
+    } else {
+        kids = children as HTMLElement[] | Element[] | string[];
+    }
+
+    if (children.length >= 1) append(element, ...kids);
 
     return element;
 }

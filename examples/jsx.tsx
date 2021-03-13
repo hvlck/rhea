@@ -21,7 +21,11 @@ export const About = () => {
 };
 register(About);
 
-mount(new Set<Component>().add(T).add(About), "/about");
-mount(new Set<Component>().add(T), "/");
+export const C = () => {
+    return About();
+}
+
+mount("/about", () => C);
+mount("/", () => T);
 
 render();

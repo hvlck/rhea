@@ -72,7 +72,7 @@ test("component register append() works", () => {
 
 test("component event() subscriber and state works", () => {
     const Button: Component = () => {
-        const [st, set] = s("button", { clicks: 0 });
+        const { st, set } = s("button", { clicks: 0 });
 
         const el = b("button", "Clicks: " + st.clicks);
         e(el, ComponentEventType.Click, function () {
@@ -86,7 +86,7 @@ test("component event() subscriber and state works", () => {
 
     const idxComponents: Set<Component> = new Set();
     idxComponents.add(Button);
-    mount(idxComponents, "/");
+    mount("/", () => Button);
     // shim for JSDom as it doesn't support requestAnimationFrame
 
     render();

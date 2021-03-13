@@ -19,5 +19,5 @@ register(Items);
 const idxComponents: Set<Component> = new Set();
 idxComponents.add(Nav).add(Items);
 
-mount(idxComponents, "/examples/hn/");
+mount("/examples/hn/", () => Items);
 window.addEventListener("load", () => render());

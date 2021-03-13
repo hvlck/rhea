@@ -17,19 +17,21 @@ global.requestAnimationFrame = function (fn: Function) {
 };
 
 const T = () => {
-    const [st, set] = state(T, { clicks: 0 });
+    const { st, set } = state(T, { clicks: 0 });
     const el = build("p");
-    event(el, "click", () => set({ clicks: st.clicks + 1 }));
+    event(el, "click", () => {
+        set({ clicks: st.clicks + 1 });
+    });
 
     return el;
 };
 register(T);
-mount(new Set<Component>().add(T), "/");
+mount("/", () => T);
 
 test("state() functions", () => {
-    const [st, set] = state(T);
-
     const r = render();
+    const { st } = state(T, { clicks: 0 });
+    console.log(st);
     expect(r).toBe(true);
 
     const el = document.body.querySelector("*[data-component]") as HTMLElement;
@@ -38,6 +40,7 @@ test("state() functions", () => {
 
     expect(st.clicks).toBe(1);
     expect(st).not.toBeNull();
+    // @ts-expect-error
     expect(st.random).toBeNull();
 });
 
