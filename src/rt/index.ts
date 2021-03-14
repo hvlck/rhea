@@ -1,8 +1,11 @@
 // rhea runtime
 export type Component = () => HTMLElement;
 
+/**
+ *
+ */
 interface StateFunction<T extends Object> {
-    set: (updated: T) => T;
+    set: (updated: T, redraw?: boolean) => T;
     component: string;
     st: T;
     lock: () => void;
@@ -22,15 +25,14 @@ export const State: Map<string, StateFunction<any>> = new Map();
 /**
  * Creates a new state or returns a previous state for a given component.
  * @param component The component to retreive state from
- * @param state The initial state structure
+ * @param state The initial state structure. Note that this **must** be passed when first calling state() for a given component, but should not be called when getting the state for the same component again
  */
+// todo: figure out why updating set() doesn't update the `st` value in the same object
 export const state = <T extends Object>(
-    component: string | Component,
+    cmp: Component,
     state?: T
 ): StateFunction<T> => {
-    if (typeof component == "function") {
-        component = component.name.toLowerCase();
-    }
+    let component: string = cmp.name.toLowerCase();
 
     const c = State.get(component);
     if (c) {
@@ -70,10 +72,9 @@ export const state = <T extends Object>(
 
                 return st;
             },
-            set: (state: T, rd = true) => {
-                st.st = Object.assign({}, state);
+            set: (newState: T, rd = true) => {
+                st.st = Object.assign({}, newState);
                 st.subscribers.forEach(i => i.call(null, st.st));
-
                 if (rd == true) redraw(component);
 
                 State.set(st.component, st);
@@ -272,7 +273,7 @@ export const render = (prev = true) => {
  * @param i The function to generate the component from
  * @param name Name of the component
  */
-const hydrate = (i: Component) => {
+export const hydrate = (i: Component) => {
     const el: HTMLElement = i?.call(null);
     emit(document.body, EventType.Initialized, {
         component: i.name.toLowerCase(),
@@ -317,16 +318,21 @@ const hydrate = (i: Component) => {
  * Re-renders a single component
  * @param component The component to redraw
  */
-export const redraw = (component: string | Component) => {
+export const redraw = (cmp: string | Component) => {
+    let component = cmp;
+    if (typeof cmp == "function") {
+        component = cmp.name.toLowerCase();
+    }
+
     const el = document.body.querySelector(`*[data-component="${component}"]`);
     if (typeof component == "function") {
         component = component.name.toLowerCase();
     }
-    const cmp = Components.get(component);
-    if (el && cmp) {
-        el.replaceWith(hydrate(cmp));
+    const cmpFunction = Components.get(component);
+    if (el && cmpFunction) {
+        el.replaceWith(hydrate(cmpFunction));
         emit(el as HTMLElement, EventType.Redraw);
-    } else if (cmp && !el) {
+    } else if (cmpFunction && !el) {
         throw Error(
             `component ${component} registered but is not present in body`
         );

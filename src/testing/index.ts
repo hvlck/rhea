@@ -26,3 +26,8 @@ const t = (name: string, fn: (testing: Test) => void) => {
 };
 
 export default t;
+
+global.requestAnimationFrame = function (fn: Function) {
+    fn(1);
+    return 0;
+};

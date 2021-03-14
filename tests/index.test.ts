@@ -6,42 +6,37 @@ import {
     register,
     render,
     state,
+    hydrate,
 } from "../src/rt";
 import { build } from "../src/std";
+import "../src/testing";
 
 import "jest";
 
-global.requestAnimationFrame = function (fn: Function) {
-    fn(1);
-    return 0;
-};
-
 const T = () => {
-    const { st, set } = state(T, { clicks: 0 });
-    const el = build("p");
-    event(el, "click", () => {
-        set({ clicks: st.clicks + 1 });
-    });
-
-    return el;
+    return build("p");
 };
 register(T);
 mount("/", () => T);
 
-test("state() functions", () => {
+test("state() functions", function () {
     const r = render();
-    const { st } = state(T, { clicks: 0 });
-    console.log(st);
+    let { st, set } = state(T, { clicks: 0 });
     expect(r).toBe(true);
+    expect(st).toBeDefined();
 
-    const el = document.body.querySelector("*[data-component]") as HTMLElement;
+    const el = hydrate(T);
     expect(el).not.toBeNull();
-    el.click();
+    el.addEventListener("click", () => {
+        st = set({ clicks: st.clicks + 1 });
 
-    expect(st.clicks).toBe(1);
-    expect(st).not.toBeNull();
+        expect(st.clicks).toBe(1);
+        expect(st).not.toBeUndefined();
+    });
+
+    el.click();
     // @ts-expect-error
-    expect(st.random).toBeNull();
+    expect(st.random).toBeUndefined();
 });
 
 // component T is already registered

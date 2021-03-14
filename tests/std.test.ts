@@ -13,13 +13,9 @@ import {
     render,
     state as s,
 } from "../src/rt/index";
+import "../src/testing/index";
 
 import "jest";
-
-global.requestAnimationFrame = function (fn: Function) {
-    fn(1);
-    return 0;
-};
 
 test("component register build() works", () => {
     const Heading: Component = () => {
@@ -72,22 +68,24 @@ test("component register append() works", () => {
 
 test("component event() subscriber and state works", () => {
     const Button: Component = () => {
-        const { st, set } = s("button", { clicks: 0 });
+        let { st, set } = s(Button, { clicks: 0 });
 
         const el = b("button", "Clicks: " + st.clicks);
-        e(el, ComponentEventType.Click, function () {
-            set({ clicks: st.clicks + 1 });
-        });
+        e(
+            el,
+            "click",
+            () => {
+                st = set({ clicks: st.clicks + 1 });
+                console.log(st, el.textContent, el.dataset.component);
+            },
+            {},
+            Button
+        );
 
         return el;
     };
-
     register(Button);
-
-    const idxComponents: Set<Component> = new Set();
-    idxComponents.add(Button);
     mount("/", () => Button);
-    // shim for JSDom as it doesn't support requestAnimationFrame
 
     render();
 

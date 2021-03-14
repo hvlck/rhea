@@ -113,7 +113,7 @@ export function event(
     evtType: ComponentEventType | string,
     evt: (this: HTMLElement, ev: Event) => any,
     opts?: boolean | AddEventListenerOptions,
-    rd?: string
+    rd?: Component
 ) {
     // todo: maybe pass state as third arg to evt.call()
     // also maybe return the result of the call to evt.call()
