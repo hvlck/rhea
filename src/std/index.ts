@@ -1,5 +1,5 @@
 // standard library utilities
-import { Component, goTo, redraw } from "../rt/index";
+import { Component, goTo, hydrate, redraw } from "../rt/index";
 
 /**
  * scaffolding for easily creating an html element
@@ -9,11 +9,18 @@ import { Component, goTo, redraw } from "../rt/index";
  */
 // todo: bind <a> elements to navigate()?
 export function build(
-    type: string,
+    type: string | Component,
     attributes?: { [key: string]: string } | string,
     ...children: HTMLElement[] | Element[] | string[] | Component[]
 ) {
-    let element = document.createElement(type);
+    let element: HTMLElement;
+    if (typeof type == "function") {
+        // will this lead to errors when calling state?
+        element = hydrate(type);
+    } else {
+        element = document.createElement(type);
+    }
+
     if (attributes && typeof attributes == "string") {
         element.textContent = attributes;
     } else if (attributes && typeof attributes == "object" && attributes.text) {
