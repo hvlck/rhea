@@ -69,13 +69,5 @@
         /* Advanced Options */
         "skipLibCheck": true /* Skip type checking of declaration files. */,
         "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
-    },
-    "files": [
-        //        "./src/testing/index.ts",
-        "./src/index.ts",
-        "./src/std/index.ts",
-        "./src/rt/index.ts",
-        "examples/todomvc/index.ts",
-        "src/jsx.d.ts"
-    ]
+    }
 }

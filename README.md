@@ -23,39 +23,40 @@ Various things I would like to experiment with before fleshing out design:
 
 ## Roadmap
 
-+ ~~dynamic path segments~~
-+ ~~state~~
-+ some way to use CSS
++ some way to use CSS [contrib]
   + maybe use `<template>` for scoping
   + shadow dom?
-+ testing framework
-+ more events
++ testing framework [contrib]
++ props [core]
++ more events [core]
   + ~~global re-renders~~
   + ~~first initialisation~~
-+ i18n internationalisation
-+ global `state` object to be passed to `history.state`
-+ maybe individual `state` objects for each route
-+ easy interface for use as PWAs
-+ mixins/extensions for various internal events
-+ memoization (cached elements), similar to React.memo()
-+ ssr framework
++ i18n internationalisation [contrib]
++ global `state` object to be passed to `history.state` [core]
+  + individual `state` objects for each route?
++ easy interface for use as PWAs [contrib]
++ mixins/extensions for various internal events [core]
++ memoization (cached elements), similar to `React.memo()` [core]
++ ssr framework [contrib]
   + may be part of `rheac`
-+ tests
++ tests [core]
   + large amounts of props
   + large amounts of component children
     + this is to test whether calling the `Component`-implementing function on every event/state change is a viable idea
-+ switch route mounting to [`expressjs`-style functions](https://expressjs.com/en/guide/routing.html)
-+ find alternative to Function.name because of tree-shaking
-+ `state` api
++ `state` api [core]
   + `clear()` - clears state
   + `lock()` - locks state (Object.freeze)
   + `unlock()` - unlocks state
   + `updated(callbackfn | Set<Component>)` - performs specified callback function or redraws given components whenever state is updated
   + state guards
     + value checking in proxy stage
-+ support for appending Components as children in `std.build()`
-+ debug builds
+  + switch to non-global state by default, register global state if needed
+    + `state()` should return an object, `setGlobalState()` should set global state for that object
++ support for appending Components as children in `std.build()` [core]
++ debug builds [core]
   + may write as extension to core framework
++ component lazy-loading [undecided]
++ easy method to run most code off-thread using web workers [contrib]
 
 ## Scratchpad
 
