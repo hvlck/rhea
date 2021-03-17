@@ -107,6 +107,7 @@ export const Components: Map<string, Component> = new Map();
  * It is recommended that you do not modify this directly.
  */
 export const Index: Map<string | RegExp, Set<string>> = new Map();
+export const NotFound: Set<string> = new Set();
 
 /**
  * Re-renders items whenever the user uses the browser's forward/back buttons
@@ -144,10 +145,15 @@ export const register = (...elements: Component[]) => {
  * @param page The components you want to register on the path
  */
 export const mount = <T extends { [key: string]: any }>(
-    route: string | RegExp,
+    route: string | RegExp | undefined,
     page: (state?: T) => Component
 ) => {
-    Index.set(route, new Set<string>().add(page.call(null).name.toLowerCase()));
+    const fn = page.call(null).name.toLowerCase();
+    if (route == undefined) {
+        NotFound.add(fn);
+    } else {
+        Index.set(route, new Set<string>().add(fn));
+    }
     return true;
 };
 
@@ -164,9 +170,10 @@ const removeAll = (el: HTMLCollection) => {
  * Note that you can easily create a new URL class by calling new URL(href), and substituting `href` for the destination,
  * such as one from an `<a>` element.
  */
-export const navigate = (destination: URL) => {
+export const navigate = (destination: URL | string) => {
     const old = window.location.pathname;
-    const p = destination.pathname;
+    const p: string =
+        typeof destination == "string" ? destination : destination.pathname;
     if (p != old) window.history.pushState("", "", p);
 
     emit(document.body, EventType.Navigation, {
@@ -174,11 +181,13 @@ export const navigate = (destination: URL) => {
         next: p,
     });
     render(true);
+    emit(document.body, EventType.AfterNavigationChange);
 };
 
 /**
  * Note that the render event will be scoped to the element is called on, while the before/after page change events
  * are called on `document.body`
+ * // todo: fix after/before page change and navigation events
  * @param Initialized Fired when a component is initialised for the first time; note that this is called on `document.body` and its `event.detail` object contains a `component` key
  * @param Navigation Fired immediately after history.pushState() is called
  * @param Render The render event, called whenever a page is rendered.
@@ -186,6 +195,7 @@ export const navigate = (destination: URL) => {
  * @param GlobalRender Called on `document.body` whenever the page is changed and triggers a complete rerender.
  * @param BeforePageChange Called before a page is changed using the History API
  * @param AfterPageChange Called after a page is changed and rendered.
+ * @param AfterNavigationChange Called after a page has been navigated to
  */
 export enum EventType {
     Initialized = "initialized",
@@ -195,6 +205,7 @@ export enum EventType {
     GlobalRender = "global-render",
     BeforePageChange = "before-page-change",
     AfterPageChange = "after-page-change",
+    AfterNavigationChange = "after-navigation-change",
 }
 
 // emits an event on the given element
@@ -242,30 +253,40 @@ const path = (destination = window.location.pathname) => {
 export const render = (prev = true) => {
     if (prev) removeAll(document.body.children);
 
+    const r = (components: Set<string>) => {
+        let frag = new DocumentFragment();
+
+        components.forEach(i => {
+            const cmp = Components.get(i);
+            if (cmp) {
+                frag.appendChild(hydrate(cmp));
+                return;
+            } else {
+                throw Error(
+                    `component ${i} is not registered in the component registry`
+                );
+            }
+        });
+
+        window.requestAnimationFrame(() => {
+            document.body.append(frag);
+            emit(document.body, EventType.GlobalRender);
+        });
+    };
+
     const components = path();
-    if (components == false)
+    if (components == false && NotFound.size == 0) {
         throw Error(`${window.location.pathname} is not a registered route`);
+    } else if (NotFound.size != 0 && components == false) {
+        r(NotFound);
+        return true;
+    } else if (components != false) {
+        r(components);
 
-    let frag = new DocumentFragment();
-
-    components?.forEach(i => {
-        const cmp = Components.get(i);
-        if (cmp) {
-            frag.appendChild(hydrate(cmp));
-            return;
-        } else {
-            throw Error(
-                `component ${i} is not registered in the component registry`
-            );
-        }
-    });
-
-    window.requestAnimationFrame(() => {
-        document.body.append(frag);
-        emit(document.body, EventType.GlobalRender);
-    });
-
-    return true;
+        return true;
+    } else {
+        throw Error(`${window.location.pathname} is an invalid route`);
+    }
 };
 
 /**
