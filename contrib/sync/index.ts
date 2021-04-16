@@ -30,7 +30,7 @@ export const sync = (sync: Component) => {
     const st = State.get(component);
     if (!st || InSync.some(i => i == component)) return false;
     else {
-        st.updated("rhea::sync_update_change", (state: any) => {
+        st.subscribe("rhea::sync_update_change", (state: any) => {
             channel.postMessage({ state, component });
         });
 
@@ -59,6 +59,6 @@ channel.addEventListener("message", (message: MessageEvent<Update>) => {
     const fn = Components.get(message.data.component);
     if (!fn) return;
 
-    const st = state(fn);
+    const st = state(fn.fn);
     st.set(message.data.state);
 });

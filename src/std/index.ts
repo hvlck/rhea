@@ -8,10 +8,11 @@ import { Component, goTo, hydrate, redraw } from "../rt/index";
  * @param attributes - Attributes to apply to the HTML element
  */
 // todo: bind <a> elements to navigate()?
+// maybe return a souped-up HTMLElement, have custom methods for before/after change and DOM events
 export function build(
     type: string | Component,
     attributes?: { [key: string]: string } | string,
-    ...children: HTMLElement[] | Element[] | string[] | Component[]
+    ...children: (HTMLElement | Element | string | Component)[]
 ) {
     let element: HTMLElement;
     if (typeof type == "function") {
@@ -61,7 +62,7 @@ export function build(
  */
 export function append(
     parent: HTMLElement,
-    ...children: HTMLElement[] | Element[] | string[]
+    ...children: (HTMLElement | Element | string)[]
 ) {
     const frag = document.createDocumentFragment();
     children.forEach((i: HTMLElement | Element | string) => {
@@ -86,6 +87,7 @@ export function append(
         else frag.appendChild(i as HTMLElement);
     });
     parent.appendChild(frag);
+
     return parent;
 }
 

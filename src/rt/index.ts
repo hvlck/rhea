@@ -2,7 +2,15 @@
 export type Component = () => HTMLElement;
 
 /**
- *
+ * StateFunction represents an object that can be used to store your application's current state.
+ * @param set Sets a new state for the object
+ * @param component The component the state is assigned to; this is used for automatic redrawing
+ * @param st The actual state object. **DO NOT SET THIS DIRECTLY, IT WILL THROW AN ERROR**
+ * @param lock Locks the state, preventing modification and extension.
+ * @param clear Clears the state.
+ * @param unlcok Unlcocks the state.
+ * @param subscribe Subscribes to updates to the object.
+ * @param subscribers This is an internal map that keeps track of all subscribers to the state.
  */
 interface StateFunction<T extends Object> {
     set: (updated: T, redraw?: boolean) => T;
@@ -11,7 +19,10 @@ interface StateFunction<T extends Object> {
     lock: () => void;
     clear: () => void;
     unlock: () => void;
-    updated: (name: string, cb: Function | Set<Component>) => StateFunction<T>;
+    subscribe: (
+        name: string,
+        cb: Function | Set<Component>
+    ) => StateFunction<T>;
     subscribers: Map<string, Function>;
 }
 
@@ -59,7 +70,7 @@ export const state = <T extends Object>(
                 return st;
             },
             subscribers: new Map(),
-            updated: (
+            subscribe: (
                 name: string,
                 cb: Function | Set<Component> | Component
             ) => {
@@ -72,8 +83,8 @@ export const state = <T extends Object>(
 
                 return st;
             },
-            set: (newState: T, rd = true) => {
-                st.st = Object.assign({}, newState);
+            set: (newState: Object, rd = true) => {
+                st.st = Object.assign({}, newState) as T;
                 st.subscribers.forEach(i => i.call(null, st.st));
                 if (rd == true) redraw(component);
 
@@ -99,10 +110,13 @@ export const state = <T extends Object>(
  * The function is the function that generates a new HTMLElement; this should be in its return value.
  * It is recommended that you do not modify this directly.
  */
-export const Components: Map<string, Component> = new Map();
+export const Components: Map<
+    string,
+    { fn: Component; el: HTMLElement }
+> = new Map();
 
 /**
- * Index is the index of routes (based on window.location.pathname) and the corresponding list of components that it consists of.
+ * Index is the index of routes (based on `window.location.pathname`) and the corresponding list of components that it consists of.
  * The key is the route, and the value is the list of components the route is made of.
  * It is recommended that you do not modify this directly.
  */
@@ -132,7 +146,12 @@ export const register = (...elements: Component[]) => {
             if (Components.get(n)) {
                 throw Error(`component ${n} has already been defined!`);
             } else {
-                Components.set(element.name.toLowerCase(), element);
+                const ob = {
+                    fn: element,
+                    el: element.call(null),
+                };
+
+                Components.set(element.name.toLowerCase(), ob);
                 return true;
             }
         })
@@ -259,7 +278,7 @@ export const render = (prev = true) => {
         components.forEach(i => {
             const cmp = Components.get(i);
             if (cmp) {
-                frag.appendChild(hydrate(cmp));
+                frag.appendChild(hydrate(cmp.fn));
                 return;
             } else {
                 throw Error(
@@ -345,22 +364,18 @@ export const redraw = (cmp: string | Component) => {
         component = cmp.name.toLowerCase();
     }
 
-    const el = document.body.querySelector(`*[data-component="${component}"]`);
     if (typeof component == "function") {
         component = component.name.toLowerCase();
     }
+
     const cmpFunction = Components.get(component);
-    if (el && cmpFunction) {
-        el.replaceWith(hydrate(cmpFunction));
+    if (cmpFunction) {
+        const { el, fn } = cmpFunction;
+
+        el.replaceWith(hydrate(fn));
         emit(el as HTMLElement, EventType.Redraw);
-    } else if (cmpFunction && !el) {
-        throw Error(
-            `component ${component} registered but is not present in body`
-        );
     } else {
-        throw Error(
-            `failed to get component ${component}, does not exist in body`
-        );
+        throw Error(`component ${component} is not registered`);
     }
 };
 

@@ -47,7 +47,7 @@ Rhea is also primarily feature-complete at this point. It makes a point of being
                 "The complete documentation can be found here."
             )
         ),
-        b("nav", "", b("a", { href: "/runtime", text: "Next: Runtime" }))
+        b("nav", "", b("a"), b("a", { href: "/runtime", text: "Next: Runtime" }))
     );
 };
 

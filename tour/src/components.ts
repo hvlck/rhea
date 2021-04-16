@@ -134,4 +134,3 @@ mount(/.+/, () => {
 });
 
 window.addEventListener("load", () => render());
-document.body.addEventListener("global-render", () => {}, { once: true });
