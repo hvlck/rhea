@@ -133,4 +133,8 @@ mount(/.+/, () => {
     return Docs;
 });
 
-window.addEventListener("load", () => render());
+window.addEventListener("load", () =>
+    render({
+        prerender: [/.+/, "/runtime"],
+    })
+);
