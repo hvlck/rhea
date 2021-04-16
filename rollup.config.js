@@ -20,6 +20,21 @@ export default [
             include: "src/**",
         },
     },
+    {
+        input: "examples/hn/index.ts",
+        output: [
+            {
+                file: "dist/examples/hn/index.js",
+                format: "es",
+                sourcemap: true,
+                banner,
+            },
+        ],
+        plugins: [resolve(), typescript()],
+        watch: {
+            include: "examples/**",
+        },
+    },
     /*
     {
         input: "tests/index.test.ts",

@@ -1,4 +1,4 @@
-import { Component, mount, register, render } from "../src/rt";
+import { mount, register, render } from "../src/rt";
 import * as Rhea from "../src/std/index";
 
 export const T = () => {
@@ -23,7 +23,7 @@ register(About);
 
 export const C = () => {
     return About();
-}
+};
 
 mount("/about", () => C);
 mount("/", () => T);

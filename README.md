@@ -43,20 +43,62 @@ Various things I would like to experiment with before fleshing out design:
   + large amounts of props
   + large amounts of component children
     + this is to test whether calling the `Component`-implementing function on every event/state change is a viable idea
-+ `state` api [core]
-  + `clear()` - clears state
-  + `lock()` - locks state (Object.freeze)
-  + `unlock()` - unlocks state
-  + `updated(callbackfn | Set<Component>)` - performs specified callback function or redraws given components whenever state is updated
++ `state` API [core]
+  + ~~`clear()` - clears state~~
+  + ~~`lock()` - locks state (Object.freeze)~~
+  + ~~`unlock()` - unlocks state~~
+  + ~~`subscribe(callbackfn | Set<Component>)` - performs specified callback function or redraws given components whenever state is updated~~
+  + `unsubscribe` - unsubscribe from state updates
+  + some concept of readable/writable stores similar to svelte
+  + state diffing (`new === current`)
   + state guards
     + value checking in proxy stage
   + switch to non-global state by default, register global state if needed
     + `state()` should return an object, `setGlobalState()` should set global state for that object
+  + pass state in event handlers bound in `event()`
+  + see if local variable declarations will work in Component functions instead of global state registry (1)
+  + some way to only modify element properties in-place, rather than re-rendering the entire element
 + support for appending Components as children in `std.build()` [core]
 + debug builds [core]
   + may write as extension to core framework
 + component lazy-loading [undecided]
+  + `import()`/`satellite.ts`
 + easy method to run most code off-thread using web workers [contrib]
++ decide whether to switch arrow functions to normal functions for perf improvements
++ better event delegation (for bound `<a>` elements and others)
++ transition to deno-based package rather than npm
++ event delegation by default
++ `render()` configuration API
+  + `prerender` option, to load routes immediately rather than as needed (2)
+    + only literal URLs can be pre-rendered, rather than multiple regex matches
+  + LRU cache for already-loaded routes (3)
+  + for LRU and `prerender`, and some mechanism to override cache
++ add memoization where possible
+
+(1)
+
+```typescript
+const El = () => {
+  const state = { clicks: 0 }
+  const el = build("h1", "Clicks: " + state.clicks);
+  event(el, "click", () => state.clicks++, { passive: true })
+  return el;
+}
+```
+
+(2)
+
+```typescript
+render({
+  prerender: [/prerender/, /\//] // executes the relevant top-level route function on any page load, then stores the result; result is swapped in immediately, bypassing the render cycle
+})
+```
+
+```typescript
+render({
+  cache: 3, // will store the 3 last-used routes in cache, and automatically substitute them in rather than going through an entire page render
+})
+```
 
 ## Scratchpad
 
