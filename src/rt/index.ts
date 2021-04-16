@@ -1,108 +1,7 @@
 // rhea runtime
 export type Component = () => HTMLElement;
 
-/**
- * StateFunction represents an object that can be used to store your application's current state.
- * @param set Sets a new state for the object
- * @param component The component the state is assigned to; this is used for automatic redrawing
- * @param st The actual state object. **DO NOT SET THIS DIRECTLY, IT WILL THROW AN ERROR**
- * @param lock Locks the state, preventing modification and extension.
- * @param clear Clears the state.
- * @param unlcok Unlcocks the state.
- * @param subscribe Subscribes to updates to the object.
- * @param subscribers This is an internal map that keeps track of all subscribers to the state.
- */
-interface StateFunction<T extends Object> {
-    set: (updated: T, redraw?: boolean) => T;
-    component: string;
-    st: T;
-    lock: () => void;
-    clear: () => void;
-    unlock: () => void;
-    subscribe: (
-        name: string,
-        cb: Function | Set<Component>
-    ) => StateFunction<T>;
-    subscribers: Map<string, Function>;
-}
-
-/**
- * Global state object. Each key corresponds to a component. It is recommended that you don't set this directly and let
- * rhea manage it for you.
- */
-export const State: Map<string, StateFunction<any>> = new Map();
-
-// possibly change signature so that to get state component would have to call s.call(Component, initialState)?
-/**
- * Creates a new state or returns a previous state for a given component.
- * @param component The component to retreive state from
- * @param state The initial state structure. Note that this **must** be passed when first calling state() for a given component, but should not be called when getting the state for the same component again
- */
-// todo: figure out why updating set() doesn't update the `st` value in the same object
-export const state = <T extends Object>(
-    cmp: Component,
-    state?: T
-): StateFunction<T> => {
-    let component: string = cmp.name.toLowerCase();
-
-    const c = State.get(component);
-    if (c) {
-        return c;
-    } else if (state != undefined) {
-        const st: StateFunction<T> = {
-            component,
-            st: {
-                set(prop: string) {
-                    throw Error(
-                        `do not set state values on components directly! you tried to set property ${prop} on component ${component}`
-                    );
-                },
-                ...state,
-            },
-            lock: () => {
-                st.st = Object.freeze(st.st);
-            },
-            clear: () => {
-                Object.keys(st.st).forEach(i => delete st.st[i]);
-            },
-            unlock: () => {
-                JSON.parse(JSON.stringify(state));
-                return st;
-            },
-            subscribers: new Map(),
-            subscribe: (
-                name: string,
-                cb: Function | Set<Component> | Component
-            ) => {
-                if (typeof cb == "function") st.subscribers.set(name, cb);
-                else {
-                    st.subscribers.set(name, () =>
-                        cb.forEach(cmp => redraw(cmp))
-                    );
-                }
-
-                return st;
-            },
-            set: (newState: Object, rd = true) => {
-                st.st = Object.assign({}, newState) as T;
-                st.subscribers.forEach(i => i.call(null, st.st));
-                if (rd == true) redraw(component);
-
-                State.set(st.component, st);
-                return st.st;
-            },
-        };
-
-        State.set(component, st);
-        return st;
-    } else if (state == undefined && !c) {
-        throw Error(
-            `no initial state defined when initialising state for ${component}`
-        );
-    } else {
-        throw Error("failed to provide necessary arguments in calling state()");
-    }
-};
+export * from "./state";
 
 /**
  * Components is a list of unique components and the functions that generate them.
@@ -128,7 +27,7 @@ export const NotFound: Set<string> = new Set();
  */
 window.addEventListener("popstate", () => {
     emit(document.body, EventType.BeforePageChange);
-    render(true);
+    render({}, true);
     emit(document.body, EventType.AfterPageChange);
 });
 
@@ -158,13 +57,15 @@ export const register = (...elements: Component[]) => {
         .some(i => (i == false ? false : true));
 };
 
+type Route = string | RegExp | undefined;
+
 /**
- * Registers components for a given route
+ * Registers components for a given route. When the given `route` is navigated to, the `page` callback will be called.
  * @param route The paths you want to register the component for
  * @param page The components you want to register on the path
  */
 export const mount = <T extends { [key: string]: any }>(
-    route: string | RegExp | undefined,
+    route: Route,
     page: (state?: T) => Component
 ) => {
     const fn = page.call(null).name.toLowerCase();
@@ -199,7 +100,7 @@ export const navigate = (destination: URL | string) => {
         old,
         next: p,
     });
-    render(true);
+    render({}, true);
     emit(document.body, EventType.AfterNavigationChange);
 };
 
@@ -264,28 +165,97 @@ const path = (destination = window.location.pathname) => {
     }
 };
 
-/**
- * Renders all components.
- * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
- */
-// todo: figure out a way to diff components on current page and next page, so that same components will not be removed
-export const render = (prev = true) => {
-    if (prev) removeAll(document.body.children);
+interface RenderOptions {
+    prerender?: Route[];
+    cache?: number;
+}
 
-    const r = (components: Set<string>) => {
-        let frag = new DocumentFragment();
+export const prerender = (route: Route, set = false): DocumentFragment => {
+    let frag = new DocumentFragment();
 
+    let components: Set<string> | undefined;
+    if (route == undefined) {
+        components = NotFound;
+    } else {
+        components = Index.get(route);
+    }
+
+    const h = () => {
+        if (components == undefined) return;
         components.forEach(i => {
             const cmp = Components.get(i);
             if (cmp) {
                 frag.appendChild(hydrate(cmp.fn));
-                return;
             } else {
                 throw Error(
                     `component ${i} is not registered in the component registry`
                 );
             }
         });
+    };
+
+    if (components != undefined) {
+        h();
+    } else {
+        if (route instanceof RegExp) {
+            Index.forEach((_, v) => {
+                if (v instanceof RegExp) {
+                    if (
+                        v.source === route.source &&
+                        v.global === route.global &&
+                        v.ignoreCase === route.ignoreCase &&
+                        v.multiline === route.multiline
+                    ) {
+                        components = Index.get(v);
+                        h();
+                    }
+                }
+            });
+        } else if (typeof route == "string") {
+            Index.forEach((_, v) => {
+                if (v instanceof RegExp && v.test(route) == true) {
+                    components = Index.get(v);
+                    h();
+                }
+            });
+        }
+    }
+
+    if (set == true && cache.has(route) == false) cache.set(route, frag);
+
+    return frag;
+};
+
+export const cache: Map<Route, DocumentFragment> = new Map();
+
+/**
+ * Renders all components.
+ * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
+ */
+// todo: figure out a way to diff components on current page and next page, so that same components will not be removed
+export const render = (options?: RenderOptions, prev = true) => {
+    const t = `${Math.ceil(Math.random() * 2000)}`;
+    console.time(t);
+    if (prev) removeAll(document.body.children);
+
+    const r = (components: Set<string>, route?: Route) => {
+        let frag = new DocumentFragment();
+
+        const cached = cache.get(route);
+        if (cached == undefined) {
+            components.forEach(i => {
+                const cmp = Components.get(i);
+                if (cmp) {
+                    frag.appendChild(hydrate(cmp.fn));
+                } else {
+                    throw Error(
+                        `component ${i} is not registered in the component registry`
+                    );
+                }
+            });
+        } else {
+            frag = cached;
+        }
 
         window.requestAnimationFrame(() => {
             document.body.append(frag);
@@ -293,15 +263,25 @@ export const render = (prev = true) => {
         });
     };
 
+    if (options?.prerender)
+        options.prerender.forEach(i =>
+            // @ts-ignore
+            window.requestIdleCallback(() => prerender(i, true), {
+                timeout: 100,
+            })
+        );
+
     const components = path();
     if (components == false && NotFound.size == 0) {
+        console.timeEnd(t);
         throw Error(`${window.location.pathname} is not a registered route`);
     } else if (NotFound.size != 0 && components == false) {
-        r(NotFound);
+        r(NotFound, undefined);
+        console.timeEnd(t);
         return true;
     } else if (components != false) {
         r(components);
-
+        console.timeEnd(t);
         return true;
     } else {
         throw Error(`${window.location.pathname} is an invalid route`);
