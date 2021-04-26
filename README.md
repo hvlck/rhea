@@ -87,21 +87,12 @@ render({
 
 ## Scratchpad
 
-+ fetch progress
-  + `content-length` headers
-    + [samundrak/fetch-progress: Progress of response for fetch API](https://github.com/samundrak/fetch-progress)
-  + Streams API
-    + [AnthumChris/fetch-progress-indicators: Progress indicators/bars using Streams, Service Workers, and Fetch APIs](https://github.com/AnthumChris/fetch-progress-indicators)
-  + Writable streams
-+ performance testing with `console.profile()`
-+ `data-refresh` to refresh all content
-
 ## Principles
 
 + lightweight (>10kb gzipped + minified)
 + safe (easy testing, type-safe)
   + important things (e.g. component/global state) should be proxied
-+ reactive (>200ms from event to reaction)
++ reactive (>200ms from event to completely render)
 + smaller things:
   + page should load quickly after a full refresh
 

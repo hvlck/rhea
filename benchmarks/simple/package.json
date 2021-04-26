@@ -1,7 +1,7 @@
 {
-    "name": "uibench",
+    "name": "simplebench-rhea",
     "version": "0.0.1",
-    "description": "uibench for rhea",
+    "description": "simple rhea benchmarking tool",
     "main": "./src/index.ts",
     "license": "GPL-3.0-or-later",
     "private": true,
@@ -10,9 +10,12 @@
         "build": "npx esbuild ./src/index.tsx --bundle --sourcemap --outfile=dist/index.js --target=chrome58,firefox57,safari11,edge16"
     },
     "devDependencies": {
+        "@rhea.ts/core": "0.0.3-canary-6",
         "esbuild": "^0.8.56",
         "ts-node": "^9.1.1",
-        "typescript": "^4.2.3",
-        "file:../../": "0.0.3-canary-6"
+        "typescript": "^4.2.3"
+    },
+    "dependencies": {
+        "thaw.js": "^2.1.4"
     }
 }
