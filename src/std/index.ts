@@ -1,6 +1,37 @@
 // standard library utilities
 import { Component, goTo, hydrate, redraw } from "../rt/index";
 
+type ElementName =
+    | "div"
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "p"
+    | "b"
+    | "i"
+    | "em"
+    | "mark"
+    | "sup"
+    | "sub"
+    | "blockquote"
+    | "cite"
+    | "title"
+    | "meta"
+    | "link"
+    | "script"
+    | "table"
+    | "thead"
+    | "th"
+    | "tbody"
+    | "tr"
+    | "td"
+    | "img"
+    | "video"
+    | "nav";
+
 /**
  * scaffolding for easily creating an html element
  * @param type The type of HTML element to create
@@ -10,7 +41,7 @@ import { Component, goTo, hydrate, redraw } from "../rt/index";
 // todo: bind <a> elements to navigate()?
 // maybe return a souped-up HTMLElement, have custom methods for before/after change and DOM events
 export function build(
-    type: string | Component,
+    type: ElementName | string | Component,
     attributes?: { [key: string]: string } | string,
     ...children: (HTMLElement | Element | string | Component)[]
 ) {
@@ -55,6 +86,10 @@ export function build(
     return element;
 }
 
+// number of elements in a batch writer
+// anything more than 100 tanks performance
+const NUMBER_OF_BATCHES = 25;
+
 /**
  * Helper function to append children to parent.
  * @param parent Parent element to append children to
@@ -64,29 +99,50 @@ export function append(
     parent: HTMLElement,
     ...children: (HTMLElement | Element | string)[]
 ) {
-    const frag = document.createDocumentFragment();
-    children.forEach((i: HTMLElement | Element | string) => {
-        let el;
-        if (
-            i instanceof HTMLElement &&
-            i instanceof HTMLAnchorElement &&
-            i.href
-        ) {
-            const url = new URL(i.href);
-            if (url.origin.startsWith(window.location.origin) == true) {
-                i.addEventListener("click", evt => {
-                    if (i.dataset.bound) return;
-                    i.dataset.bound = "true";
-                    goTo(evt, url);
-                });
+    const write = (kids: (HTMLElement | Element | string)[]) => {
+        const frag = document.createDocumentFragment();
+        kids.forEach((i: HTMLElement | Element | string) => {
+            let el;
+            if (
+                i instanceof HTMLElement &&
+                i instanceof HTMLAnchorElement &&
+                i.href
+            ) {
+                const url = new URL(i.href);
+                if (url.origin.startsWith(window.location.origin) == true) {
+                    i.addEventListener("click", evt => {
+                        if (i.dataset.bound) return;
+                        i.dataset.bound = "true";
+                        goTo(evt, url);
+                    });
+                }
+            } else if (typeof i == "string") {
+                el = document.createTextNode(i);
             }
-        } else if (typeof i == "string") {
-            el = document.createTextNode(i);
+
+            if (el != undefined) {
+                frag.appendChild(el);
+            } else {
+                frag.appendChild(i as HTMLElement);
+            }
+        });
+        requestAnimationFrame(() => {
+            parent.appendChild(frag);
+        });
+    };
+
+    if (children.length >= 250) {
+        const distance = children.length / NUMBER_OF_BATCHES;
+        let i = 0;
+
+        while (i < children.length) {
+            const r = i;
+            setTimeout(() => write(children.slice(r, r + distance)), 0);
+            i += distance;
         }
-        if (el != undefined) frag.appendChild(el);
-        else frag.appendChild(i as HTMLElement);
-    });
-    parent.appendChild(frag);
+    } else {
+        setTimeout(() => write(children), 0);
+    }
 
     return parent;
 }
