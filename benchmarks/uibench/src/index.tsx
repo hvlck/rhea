@@ -1,4 +1,4 @@
-import { build, append } from "@rhea.ts/core";
+import { build, append } from "../../../src/std/index";
 
 const Cell = (props: string) => {
     const el = build("td", {
