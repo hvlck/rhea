@@ -35,6 +35,21 @@ export default [
             include: "examples/**",
         },
     },
+    {
+        input: "examples/todomvc/index.ts",
+        output: [
+            {
+                file: "dist/examples/todomvc/index.js",
+                format: "es",
+                sourcemap: true,
+                banner,
+            },
+        ],
+        plugins: [resolve(), typescript()],
+        watch: {
+            include: "examples/**",
+        },
+    },
     /*
     {
         input: "tests/index.test.ts",

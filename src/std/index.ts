@@ -151,20 +151,19 @@ export function append(
  * Event types for components. A string can be passed, but this is a typed variant for better safety.
  * @param Click Click event
  */
-export enum ComponentEventType {
-    Click = "click",
-    Keydown = "keydown",
-    Keyup = "keyup",
-    Keypress = "keypress",
-    Focus = "focus",
-    Blur = "blur",
-    Input = "input",
-    Change = "change",
-    MouseOver = "mouseover",
-    MouseEnter = "mouseenter",
-    MouseExit = "mousexit",
-    MouseLeave = "mouseleave",
-}
+export type ComponentEventType =
+    | "click"
+    | "keydown"
+    | "keyup"
+    | "keypress"
+    | "focus"
+    | "blur"
+    | "input"
+    | "change"
+    | "mouseover"
+    | "mouseenter"
+    | "mousexit"
+    | "mouseleave";
 
 /**
  * subscribes an element to the given event, and calls the passed callback when the event fires
@@ -173,6 +172,7 @@ export enum ComponentEventType {
  * @param evt The callback to perform when the event is triggered
  * @param rd Redraw - if set, the specified element will be redrawn. If the `el` parameter is a component, it will automatically be redrawn.
  */
+// todo: better event delegation
 export function event(
     el: HTMLElement,
     evtType: ComponentEventType | string,
@@ -229,4 +229,55 @@ export function head(...el: HTMLHeadElement[]) {
 
         document.head.appendChild(i);
     });
+}
+
+type CoercibleElementProperty = string | undefined | boolean | any;
+
+// this is a very simplistic mutation queue API based on Wilson Page's `fastdom`
+// https://github.com/wilsonpage/fastdom
+
+const batches: Map<
+    HTMLElement | number,
+    { [key: string]: CoercibleElementProperty } | Function
+> = new Map();
+let mutationQueued = false;
+
+export function mutate(
+    element: HTMLElement | null,
+    props: { [key: string]: CoercibleElementProperty } | Function
+) {
+    let el = element == null ? Math.ceil(Math.random() * 40000) : element;
+    batches.set(el, props);
+    enqueue();
+}
+
+function enqueue() {
+    if (mutationQueued == false) {
+        mutationQueued = true;
+        requestAnimationFrame(() => {
+            for (const [el, fn] of batches) {
+                if (el instanceof HTMLElement) {
+                    const props = Object.entries(fn);
+                    if (props.length >= 1) {
+                        for (const [key, value] of props) {
+                            if (typeof value == "object") {
+                                for (const [prop, v] of Object.entries(value)) {
+                                    el[key][prop] = v;
+                                }
+                            } else {
+                                el[key] = value;
+                            }
+                        }
+                    } else if (typeof fn == "function") {
+                        fn.call(null, el);
+                    }
+                } else if (typeof el == "number" && typeof fn == "function") {
+                    fn.call(null);
+                }
+
+                batches.delete(el);
+            }
+        });
+        mutationQueued = false;
+    }
 }

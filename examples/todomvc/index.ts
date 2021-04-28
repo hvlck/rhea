@@ -1,23 +1,29 @@
 import { Component, register, mount, render } from "../../src/rt/index";
-import { build as b } from "../../src/std/index";
+import { event, build, mutate, append } from "../../src/std/index";
 
 const Nav = () => {
-    const nav = b("nav");
-
+    const nav = build("nav");
     return nav;
 };
 
 register(Nav);
 
 const Items = () => {
-    const el = b("ul");
-    return el;
+    const el = build("ul");
+
+    return append(el);
 };
 
 register(Items);
 
-const idxComponents: Set<Component> = new Set();
-idxComponents.add(Nav).add(Items);
+const Main = () => {
+    return append(build("div"), Nav(), Items());
+};
 
-mount("/examples/hn/", () => Items);
-window.addEventListener("load", () => render());
+register(Main);
+
+mount("/examples/todomvc/", () => {
+    return Main;
+});
+
+window.addEventListener("DOMContentLoaded", () => render());

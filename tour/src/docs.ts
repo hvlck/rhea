@@ -47,7 +47,12 @@ Rhea is also primarily feature-complete at this point. It makes a point of being
                 "The complete documentation can be found here."
             )
         ),
-        b("nav", "", b("a"), b("a", { href: "/runtime", text: "Next: Runtime" }))
+        b(
+            "nav",
+            "",
+            b("a"),
+            b("a", { href: "/runtime", text: "Next: Runtime" })
+        )
     );
 };
 
@@ -110,7 +115,7 @@ export const Runtime = () => {
         b("h2", "Runtime"),
         b(
             "p",
-            `Rhea's runtime is lightweight and simple. It consists of 3 parts - `
+            `Rhea's runtime is lightweight and simple. It consists of three parts: `
         ),
         a(
             b("ul"),

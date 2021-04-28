@@ -234,8 +234,6 @@ export const cache: Map<Route, DocumentFragment> = new Map();
  */
 // todo: figure out a way to diff components on current page and next page, so that same components will not be removed
 export const render = (options?: RenderOptions, prev = true) => {
-    const t = `${Math.ceil(Math.random() * 2000)}`;
-    console.time(t);
     if (prev) removeAll(document.body.children);
 
     const r = (components: Set<string>, route?: Route) => {
@@ -273,15 +271,12 @@ export const render = (options?: RenderOptions, prev = true) => {
 
     const components = path();
     if (components == false && NotFound.size == 0) {
-        console.timeEnd(t);
         throw Error(`${window.location.pathname} is not a registered route`);
     } else if (NotFound.size != 0 && components == false) {
         r(NotFound, undefined);
-        console.timeEnd(t);
         return true;
     } else if (components != false) {
         r(components);
-        console.timeEnd(t);
         return true;
     } else {
         throw Error(`${window.location.pathname} is an invalid route`);
