@@ -281,3 +281,9 @@ function enqueue() {
         mutationQueued = false;
     }
 }
+
+export const lazy = (src: string): Promise<Component> => {
+    return import(src).then(imports => {
+        return imports.default;
+    });
+};

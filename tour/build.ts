@@ -8,6 +8,8 @@ require("esbuild")
         treeShaking: true,
         watch: true,
         keepNames: true,
+        target: "es2020",
+        format: "esm",
     })
     .catch(() => process.exit(1));
 
