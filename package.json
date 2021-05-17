@@ -1,6 +1,6 @@
 {
     "name": "@rhea.ts/core",
-    "version": "0.0.3-canary-6",
+    "version": "0.0.4",
     "description": "the micro rendering framework",
     "repository": "https://github.com/hvlck/rhea",
     "author": "EthanJustice <47954690+EthanJustice@users.noreply.github.com>",

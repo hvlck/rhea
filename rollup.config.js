@@ -20,7 +20,7 @@ export default [
             include: "src/**",
         },
     },
-    {
+    /*    {
         input: "examples/hn/index.ts",
         output: [
             {
@@ -34,7 +34,7 @@ export default [
         watch: {
             include: "examples/**",
         },
-    },
+    },*/
     {
         input: "examples/todomvc/index.ts",
         output: [
