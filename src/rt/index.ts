@@ -88,7 +88,7 @@ export const mount = <T extends { [key: string]: any }>(
 
 // removes all children from the given element
 const removeAll = (el: HTMLCollection) => {
-    window.requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
         Array.from(el).forEach(i => i.remove());
     });
 };
@@ -142,14 +142,9 @@ const emit = (el: HTMLElement, event: EventType, detail?: Object) =>
     el.dispatchEvent(new CustomEvent(event.toString(), { detail }));
 
 // helper function for binding `<a>` elements to prevent default navigation behaviour
-export const goTo = (evt: Event, url: URL) => {
-    evt.preventDefault();
-    if (evt.defaultPrevented == true) {
-        navigate(url);
-        return true;
-    }
-
-    return false;
+export const goTo = (url: URL, evt?: Event) => {
+    evt?.preventDefault();
+    navigate(url);
 };
 
 /**
@@ -242,7 +237,11 @@ export const cache: Map<Route, DocumentFragment> = new Map();
  * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
  */
 // todo: figure out a way to diff components on current page and next page, so that same components will not be removed
-export const render = (options?: RenderOptions, prev = true) => {
+export const render = (
+    options?: RenderOptions,
+    prev = true,
+    route = window.location.pathname
+) => {
     if (prev) removeAll(document.body.children);
 
     const r = (components: Set<string>, route?: Route) => {
@@ -264,7 +263,7 @@ export const render = (options?: RenderOptions, prev = true) => {
             frag = cached;
         }
 
-        window.requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
             document.body.append(frag);
             emit(document.body, EventType.GlobalRender);
         });
@@ -278,7 +277,7 @@ export const render = (options?: RenderOptions, prev = true) => {
             })
         );
 
-    const components = path();
+    const components = path(route);
     if (components == false && NotFound.size == 0) {
         throw Error(`${window.location.pathname} is not a registered route`);
     } else if (NotFound.size != 0 && components == false) {
@@ -318,7 +317,7 @@ export const hydrate = (i: Component) => {
             i.addEventListener("click", evt => {
                 if (i.dataset.bound) return;
                 i.dataset.bound = "true";
-                goTo(evt, new URL((i as HTMLAnchorElement).href));
+                goTo(new URL((i as HTMLAnchorElement).href), evt);
             })
         );
     }
@@ -330,7 +329,7 @@ export const hydrate = (i: Component) => {
         el.addEventListener("click", evt => {
             if (el.dataset.bound) return;
             el.dataset.bound = "true";
-            goTo(evt, new URL((el as HTMLAnchorElement).href));
+            goTo(new URL((el as HTMLAnchorElement).href), evt);
         });
     }
 

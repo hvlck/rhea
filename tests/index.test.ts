@@ -6,6 +6,8 @@ import {
     register,
     render,
     hydrate,
+    Index,
+    goTo,
 } from "../src/rt";
 import { build } from "../src/std";
 
@@ -31,4 +33,32 @@ test("register() functions properly", t => {
     t.is(Components.size, 2);
 });
 
-test("mount() properly registers mount paths", () => {});
+test("mount() properly registers mount paths", t => {
+    const Home = () => {
+        return build("p", "Home");
+    };
+    register(Home);
+
+    const Other = () => {
+        return build("p", "Other");
+    };
+    register(Other);
+
+    mount("/", () => Home);
+    mount("/other", () => Other);
+
+    t.assert(Index.get("/") != undefined);
+    t.assert(Index.get("/other") != undefined);
+
+    render({}, false, "/");
+    const $el = document.body.querySelector("p");
+    t.is($el?.textContent, "Home");
+
+    render({}, true, "/other");
+    const $el2 = document.body.querySelector("p");
+    t.is($el2?.textContent, "Other");
+});
+
+// test("prerender config option successfully generates routes", () => {});
+
+// test("cache config option successfully saves navigated pages", () => {});

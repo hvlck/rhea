@@ -7,37 +7,6 @@ import {
     requestAnimationFrame,
 } from "../rt/index";
 
-type ElementName =
-    | "div"
-    | "h1"
-    | "h2"
-    | "h3"
-    | "h4"
-    | "h5"
-    | "h6"
-    | "p"
-    | "b"
-    | "i"
-    | "em"
-    | "mark"
-    | "sup"
-    | "sub"
-    | "blockquote"
-    | "cite"
-    | "title"
-    | "meta"
-    | "link"
-    | "script"
-    | "table"
-    | "thead"
-    | "th"
-    | "tbody"
-    | "tr"
-    | "td"
-    | "img"
-    | "video"
-    | "nav";
-
 /**
  * scaffolding for easily creating an html element
  * @param type The type of HTML element to create
@@ -46,8 +15,8 @@ type ElementName =
  */
 // todo: bind <a> elements to navigate()?
 // maybe return a souped-up HTMLElement, have custom methods for before/after change and DOM events
-export function build(
-    type: ElementName | string | Component,
+export function build<K extends keyof HTMLElementTagNameMap>(
+    type: string | Component | K,
     attributes?: { [key: string]: string } | string,
     ...children: (HTMLElement | Element | string | Component)[]
 ) {
@@ -119,7 +88,7 @@ export function append(
                     i.addEventListener("click", evt => {
                         if (i.dataset.bound) return;
                         i.dataset.bound = "true";
-                        goTo(evt, url);
+                        goTo(url, evt);
                     });
                 }
             } else if (typeof i == "string") {
@@ -242,21 +211,31 @@ type CoercibleElementProperty = string | undefined | boolean | any;
 // this is a very simplistic mutation queue API based on Wilson Page's `fastdom`
 // https://github.com/wilsonpage/fastdom
 
+// batches of elements waiting to be updated
 const batches: Map<
     HTMLElement | number,
     { [key: string]: CoercibleElementProperty } | Function
 > = new Map();
-let mutationQueued = false;
 
+// determines whether a mutation is pending
+let mutationQueued = false;
+let latest = 0;
+
+/**
+ * Prepare an element for mutation during the next render cycle.
+ * @param element The element to update.
+ * @param props The properties and values of the element needing updating.
+ */
 export function mutate(
     element: HTMLElement | null,
     props: { [key: string]: CoercibleElementProperty } | Function
 ) {
-    let el = element == null ? Math.ceil(Math.random() * 40000) : element;
+    let el = element == null ? latest++ : element;
     batches.set(el, props);
     enqueue();
 }
 
+// enqueues and updates elements during the next render cycle
 function enqueue() {
     if (mutationQueued == false) {
         mutationQueued = true;
@@ -282,12 +261,18 @@ function enqueue() {
                 }
 
                 batches.delete(el);
+                latest = 0;
             }
         });
         mutationQueued = false;
     }
 }
 
+/**
+ * Lazy-loads an element. The default element of the file should be the component to load.
+ * @param src The url of the file to load the component from.
+ * @returns A promise; if fullfilled, it returns the default import, or otherwise fails.
+ */
 export const lazy = (src: string): Promise<Component> => {
     return import(src).then(imports => {
         return imports.default;

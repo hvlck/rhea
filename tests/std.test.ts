@@ -5,6 +5,7 @@ import {
     event as e,
     head,
     mutate,
+    lazy,
 } from "../src/std/index";
 import { Component, redraw, register, mount, render } from "../src/rt/index";
 
@@ -37,7 +38,7 @@ test("component register append() works", t => {
 
     const nav = Nav();
 
-    t.is(nav.children.length, 3);
+    t.is(nav.childElementCount, 3);
     t.is((nav.lastElementChild as HTMLElement).textContent, "More items");
 
     t.assert(nav instanceof HTMLElement);
@@ -45,7 +46,7 @@ test("component register append() works", t => {
 });
 
 test("component event() subscriber and state works", t => {
-    const Button: Component = () => {
+    const EventButton: Component = () => {
         const st = { clicks: 0 };
 
         const el = b("button", "Clicks: " + st.clicks);
@@ -55,19 +56,19 @@ test("component event() subscriber and state works", t => {
             () => {
                 mutate(el, { innerText: "Clicks: " + st.clicks++ });
             },
-            {},
-            Button
+            {}
         );
 
         return el;
     };
 
-    register(Button);
-    mount("/", () => Button);
+    register(EventButton);
+    mount("/", () => EventButton);
 
-    render();
+    // shim because no window.location.pathname :(
+    render({}, true, "/");
 
-    const btn = Button();
+    const btn = EventButton();
     let cb = 0;
     btn.addEventListener("click", () => {
         cb++;
@@ -105,7 +106,7 @@ test("utility head() replaces nodes successfully", t => {
 
     t.is(document.head.children.length, 1);
 
-    document.head.appendChild(
+    head(
         b("link", { rel: "stylesheet", type: "text/css", href: "/index.css" })
     );
 
@@ -113,4 +114,47 @@ test("utility head() replaces nodes successfully", t => {
 
     const el = document.head.firstElementChild;
     t.is(el?.getAttribute("href"), "/index.css");
+});
+
+test("mutate() successfully updates an element", t => {
+    const R = () => {
+        return b("h1", { textContent: "Test", data_test: "true" });
+    };
+
+    const el = R();
+
+    t.is(el.textContent, "Test");
+    t.is(el.dataset.test, "true");
+
+    mutate(el, {
+        textContent: "Changed",
+        data_test: "false",
+    });
+
+    t.is(el.textContent, "Changed");
+    t.is(el.dataset.test, "false");
+});
+
+test("mutate() successfully executes a function", t => {
+    let n = 0;
+    mutate(null, () => (n += 1));
+    t.is(n, 1);
+
+    // second test used as mutate() uses a monotomically-increasing number for storing function calls
+    mutate(null, () => (n += 1));
+    t.is(n, 2);
+});
+
+test("lazy() successfully lazy-loads a component", async t => {
+    lazy("../../tests/lazy.js").then(r => {
+        console.error(r);
+        const $el = r();
+        t.is($el.textContent, "Test");
+    });
+    /*    try {
+        
+        //        const T = await lazy("../../tests/lazy.js");
+    } catch (err) {
+        t.fail(err);
+    }*/
 });
