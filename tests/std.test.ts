@@ -4,20 +4,13 @@ import {
     ComponentEventType,
     event as e,
     head,
+    mutate,
 } from "../src/std/index";
-import {
-    Component,
-    redraw,
-    register,
-    mount,
-    render,
-    state as s,
-} from "../src/rt/index";
-import "../src/testing/index";
+import { Component, redraw, register, mount, render } from "../src/rt/index";
 
-import "jest";
+import test from "ava";
 
-test("component register build() works", () => {
+test("component register build() works", t => {
     const Heading: Component = () => {
         const el = b("h1", {
             text: "This is a heading.",
@@ -26,21 +19,15 @@ test("component register build() works", () => {
         });
         return el;
     };
-    const m = jest.fn(Heading);
-    m(); // has to call m() at least once
-
-    expect(m).toHaveBeenCalled();
-    expect(m).toReturn();
-    expect(Heading).toBeDefined();
 
     const el = Heading();
-    expect(el.className).toBe("test");
-    expect(el.textContent).toBe("This is a heading.");
+    t.is(el.className, "test");
+    t.is(el.textContent, "This is a heading.");
 
-    expect(el).toBeInstanceOf(HTMLElement);
+    t.assert(el instanceof HTMLElement);
 });
 
-test("component register append() works", () => {
+test("component register append() works", t => {
     const children = ["Home", "About", "Contact"];
     const Nav: Component = () => {
         const el = b("nav");
@@ -50,33 +37,23 @@ test("component register append() works", () => {
 
     const nav = Nav();
 
-    const m = jest.fn(() => a(nav, b("a", "Links"), b("a", "More items")));
-    m();
+    t.is(nav.children.length, 3);
+    t.is((nav.lastElementChild as HTMLElement).textContent, "More items");
 
-    expect(m).toHaveBeenCalled();
-    expect(m).toReturn();
-    expect(Nav).toBeDefined();
-
-    expect(nav.children.length).toBe(5);
-    expect((nav.lastElementChild as HTMLElement).textContent).toBe(
-        "More items"
-    );
-
-    expect(nav).toBeInstanceOf(HTMLElement);
-    expect(nav.lastElementChild).toBeInstanceOf(Element);
+    t.assert(nav instanceof HTMLElement);
+    t.assert(nav.lastElementChild instanceof Element);
 });
 
-test("component event() subscriber and state works", () => {
+test("component event() subscriber and state works", t => {
     const Button: Component = () => {
-        let { st, set } = s(Button, { clicks: 0 });
+        const st = { clicks: 0 };
 
         const el = b("button", "Clicks: " + st.clicks);
         e(
             el,
             "click",
             () => {
-                st = set({ clicks: st.clicks + 1 });
-                console.log(st, el.textContent, el.dataset.component);
+                mutate(el, { innerText: "Clicks: " + st.clicks++ });
             },
             {},
             Button
@@ -84,59 +61,56 @@ test("component event() subscriber and state works", () => {
 
         return el;
     };
+
     register(Button);
     mount("/", () => Button);
 
     render();
 
-    const m = jest.fn(e);
-
     const btn = Button();
     let cb = 0;
-    m(btn, "click", () => {
-        cb += 1;
+    btn.addEventListener("click", () => {
+        cb++;
     });
 
-    expect(m).toHaveBeenCalled();
-    expect(m).toReturn();
-    expect(Button).toBeDefined();
+    btn.click();
+    t.is(btn.textContent, "Clicks: 1");
+    t.is(cb, 1);
 
     btn.click();
-    expect(btn.textContent).toBe("Clicks: 1");
-    expect(cb).toBe(1);
-
-    btn.click();
-    expect(btn.textContent).toBe("Clicks: 2");
-    expect(cb).toBe(2);
+    t.is(btn.textContent, "Clicks: 2");
+    t.is(cb, 2);
 });
 
-test("utility head() appends nodes successfully", () => {
+test("utility head() appends nodes successfully", t => {
     const len = document.head.children.length;
     head(b("title", "This is a test title"));
 
-    expect(document.title).toBe("This is a test title");
-    expect(document.title).toBeDefined();
-    expect(document.head.children.length).toBe(len + 1);
+    t.is(document.title, "This is a test title");
+    t.assert(
+        document.title.length != null || document.title.length != undefined
+    );
+    t.is(document.head.children.length, len + 1);
 });
 
-test("utility head() replaces nodes successfully", () => {
+test("utility head() replaces nodes successfully", t => {
     // normalisation since jest doesn't reset DOM between tests
     Array.from(document.head.children).forEach(i => i.remove());
-    expect(document.head.children.length).toBe(0);
+    t.is(document.head.children.length, 0);
 
     // setup
     document.head.appendChild(
         b("link", { rel: "stylesheet", type: "text/css", href: "/index.css" })
     );
 
-    expect(document.head.children.length).toBe(1);
+    t.is(document.head.children.length, 1);
 
     document.head.appendChild(
         b("link", { rel: "stylesheet", type: "text/css", href: "/index.css" })
     );
 
-    expect(document.head.children.length).toBe(1);
+    t.is(document.head.children.length, 1);
 
     const el = document.head.firstElementChild;
-    expect(el?.getAttribute("href")).toBe("/index.css");
+    t.is(el?.getAttribute("href"), "/index.css");
 });

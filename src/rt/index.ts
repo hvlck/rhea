@@ -3,16 +3,25 @@ export type Component = () => HTMLElement;
 
 export * from "./state";
 
+export const requestAnimationFrame =
+    window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    // @ts-expect-error
+    window.mozRequestAnimationFrame ||
+    // @ts-expect-error
+    window.msRequestAnimationFrame ||
+    function (callback) {
+        return setTimeout(callback, 1000 / 60);
+    };
+
 /**
  * Components is a list of unique components and the functions that generate them.
  * The key is the function name; **these should be unique**.
  * The function is the function that generates a new HTMLElement; this should be in its return value.
  * It is recommended that you do not modify this directly.
  */
-export const Components: Map<
-    string,
-    { fn: Component; el: HTMLElement }
-> = new Map();
+export const Components: Map<string, { fn: Component; el: HTMLElement }> =
+    new Map();
 
 /**
  * Index is the index of routes (based on `window.location.pathname`) and the corresponding list of components that it consists of.

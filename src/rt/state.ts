@@ -38,7 +38,7 @@ export const State: Map<string, StateFunction<any>> = new Map();
  * @param state The initial state structure. Note that this **must** be passed when first calling state() for a given component, but should not be called when getting the state for the same component again
  */
 // todo: figure out why updating set() doesn't update the `st` value in the same object
-export const state = <T extends Object>(
+/*export*/ const state = <T extends Object>(
     cmp: Component,
     state?: T
 ): StateFunction<T> => {

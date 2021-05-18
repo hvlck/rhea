@@ -1,5 +1,11 @@
 // standard library utilities
-import { Component, goTo, hydrate, redraw } from "../rt/index";
+import {
+    Component,
+    goTo,
+    hydrate,
+    redraw,
+    requestAnimationFrame,
+} from "../rt/index";
 
 type ElementName =
     | "div"

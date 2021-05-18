@@ -1,3 +1,3 @@
 import "../src/testing";
 
-import "jest";
+import test from "ava";
