@@ -11,8 +11,8 @@
     "files": [
         "dist/rhea.es2017.js",
         "dist/rhea.es2017.js.map",
-        "dist/src/std/index.d.ts",
-        "dist/src/rt/index.d.ts",
+        "dist/types/src/std/index.d.ts",
+        "dist/types/src/rt/index.d.ts",
         "types.d.ts",
         "src/jsx.d.ts"
     ],
