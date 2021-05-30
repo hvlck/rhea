@@ -116,6 +116,21 @@ test("utility head() replaces nodes successfully", t => {
     t.is(el?.getAttribute("href"), "/index.css");
 });
 
+test("head() replaces keyed nodes", t => {
+    t.is(document.head.children.length, 0);
+
+    head(b("link", { rel: "stylesheet", key: "theme", href: "/index.css" }));
+
+    t.is(document.head.children.length, 1);
+
+    head(b("link", { rel: "stylesheet", key: "theme", href: "/other.css" }));
+    t.is(document.head.children.length, 1);
+    t.is(
+        (document.head.querySelector('[key="theme"]') as HTMLLinkElement).href,
+        "/other.css"
+    );
+});
+
 test("mutate() successfully updates an element", t => {
     const R = () => {
         return b("h1", { textContent: "Test", data_test: "true" });

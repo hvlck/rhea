@@ -13,8 +13,6 @@ import {
  * @param text Optional text of the HTML element
  * @param attributes - Attributes to apply to the HTML element
  */
-// todo: bind <a> elements to navigate()?
-// maybe return a souped-up HTMLElement, have custom methods for before/after change and DOM events
 export function build<K extends keyof HTMLElementTagNameMap>(
     type: string | Component | K,
     attributes?: { [key: string]: string } | string,
@@ -191,6 +189,8 @@ export function head(...el: HTMLHeadElement[]) {
             selector = "name";
         } else if (i.hasAttribute("href")) {
             selector = "href";
+        } else if (i.hasAttribute("key")) {
+            selector = "key";
         }
 
         let attr = "";
