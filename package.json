@@ -46,6 +46,8 @@
         "files": [
             "./tests/std.test.ts",
             "./tests/index.test.ts",
+            "./tests/ssr.test.ts",
+            "./tests/lazy.test.ts",
             "!./tests/test.test.ts"
         ],
         "require": [
