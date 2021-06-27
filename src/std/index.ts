@@ -65,11 +65,11 @@ const NUMBER_OF_BATCHES = 25;
 
 /**
  * Helper function to append children to parent.
- * @param parent Parent element to append children to
+ * @param parent Parent element to append children to. If it is ommitted, the children are appended to `document.body`
  * @param children Elements to append to parent
  */
 export function append(
-    parent: HTMLElement,
+    parent?: HTMLElement,
     ...children: (HTMLElement | Element | string)[]
 ) {
     const write = (kids: (HTMLElement | Element | string)[]) => {
@@ -100,6 +100,7 @@ export function append(
             }
         });
         requestAnimationFrame(() => {
+            if (!parent) parent = document.body;
             parent.appendChild(frag);
         });
     };
