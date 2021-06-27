@@ -69,7 +69,7 @@ const NUMBER_OF_BATCHES = 25;
  * @param children Elements to append to parent
  */
 export function append(
-    parent?: HTMLElement,
+    parent: HTMLElement,
     ...children: (HTMLElement | Element | string)[]
 ) {
     const write = (kids: (HTMLElement | Element | string)[]) => {
@@ -84,8 +84,6 @@ export function append(
                 const url = new URL(i.href);
                 if (url.origin.startsWith(window.location.origin) == true) {
                     i.addEventListener("click", evt => {
-                        if (i.dataset.bound) return;
-                        i.dataset.bound = "true";
                         goTo(url, evt);
                     });
                 }

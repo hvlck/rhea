@@ -365,7 +365,6 @@ export const hydrate = (i: Component) => {
         hasLink.forEach(i =>
             i.addEventListener("click", evt => {
                 if (i.dataset.bound) return;
-                i.dataset.bound = "true";
                 goTo(new URL((i as HTMLAnchorElement).href), evt);
             })
         );
