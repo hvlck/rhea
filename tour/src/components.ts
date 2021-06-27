@@ -1,27 +1,18 @@
 import {
     append as a,
     build as b,
-    ComponentEventType,
     event as e,
     head as h,
 } from "../../src/std/index";
-import {
-    Components,
-    Component,
-    redraw,
-    register,
-    mount,
-    render,
-    state as s,
-} from "../../src/rt/index";
+import { register, mount, render } from "../../src/rt/index";
 import {
     Components as Cmp,
     Index,
     Runtime,
     Router,
-    State,
     Std,
     Examples,
+    Contrib,
     Testing,
     UnderTheHood,
 } from "./docs";
@@ -33,9 +24,9 @@ const Toc = () => {
         b("a", { text: "Runtime", href: "/runtime" }),
         b("a", { text: "Components", href: "/components" }),
         b("a", { text: "Router", href: "/router" }),
-        b("a", { text: "State", href: "/state" }),
         b("a", { text: "Standard Library", href: "/std" }),
         b("a", { text: "Examples", href: "/examples" }),
+        b("a", { text: "Contrib", href: "/contrib" }),
         b("a", { text: "Testing", href: "/testing" }),
         b("a", { text: "Under the Hood", href: "/under-the-hood" })
     );
@@ -60,12 +51,13 @@ const Nav = () => {
     );
 };
 
-const nav: Set<string> = new Set();
-register(Nav);
+const nav = Nav();
+
+register(false, Nav);
 
 const Docs = () => {
     const el = b("div");
-    let content: HTMLElement;
+    let content: HTMLElement = b("div");
     switch (window.location.pathname) {
         case "/": {
             content = Index();
@@ -83,10 +75,6 @@ const Docs = () => {
             content = Router();
             break;
         }
-        case "/state": {
-            content = State();
-            break;
-        }
         case "/std": {
             content = Std();
             break;
@@ -97,6 +85,10 @@ const Docs = () => {
         }
         case "/testing": {
             content = Testing();
+            break;
+        }
+        case "/contrib": {
+            content = Contrib();
             break;
         }
         case "/under-the-hood": {
@@ -120,21 +112,14 @@ const Docs = () => {
     );
 
     return a(
-        el,
-        b("h1", "Tour of Rhea"),
-        b("p", "The micro rendering framework."),
-        a(b("div", { id: "content" }), content)
+        b("div"),
+        nav,
+        a(el, b("h1", "Tour of Rhea"), a(b("div", { id: "content" }), content))
     );
 };
 
-register(Docs);
+register(false, Docs);
 
-mount(/.+/, () => {
-    return Docs;
-});
+mount(/.+/, () => Docs);
 
-window.addEventListener("load", () =>
-    render({
-        prerender: [/.+/, "/runtime"],
-    })
-);
+window.addEventListener("load", () => render());
