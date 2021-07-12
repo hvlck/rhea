@@ -1,6 +1,6 @@
 {
     "name": "@rhea.ts/core",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "type": "module",
     "description": "the micro rendering framework",
     "repository": "https://github.com/hvlck/rhea",
