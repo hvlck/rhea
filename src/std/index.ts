@@ -10,8 +10,8 @@ import {
 /**
  * scaffolding for easily creating an html element
  * @param type The type of HTML element to create
- * @param text Optional text of the HTML element
- * @param attributes - Attributes to apply to the HTML element
+ * @param attributes Attributes to apply to the HTML element
+ * @param children Children to append
  */
 export function build<K extends keyof HTMLElementTagNameMap>(
     type: string | Component | K,
