@@ -15,7 +15,9 @@ import {
  */
 export function build<K extends keyof HTMLElementTagNameMap>(
     type: string | Component | K,
-    attributes?: { [key: string]: string } | string,
+    attributes?:
+        | { [key: string]: string | ((this: HTMLElement, ev: Event) => any) }
+        | string,
     ...children: (HTMLElement | Element | string | Component)[]
 ) {
     let element: HTMLElement;
@@ -29,18 +31,26 @@ export function build<K extends keyof HTMLElementTagNameMap>(
     if (attributes && typeof attributes == "string") {
         element.textContent = attributes;
     } else if (attributes && typeof attributes == "object" && attributes.text) {
-        element.textContent = attributes.text;
+        element.textContent = attributes.text as string;
     }
 
     if (typeof attributes == "object" && attributes != null) {
         Object.keys(attributes).forEach(item => {
             if (item == "text") return;
             if (element.hasAttribute(item) || item in element) {
-                element.setAttribute(item, attributes[item]);
+                element.setAttribute(item, attributes[item] as string);
             } else if (item == "class") {
-                element.classList.add(...attributes[item].split(" "));
-            } else if (item.startsWith("data_")) {
-                element.dataset[item.replace("data_", "")] = attributes[item];
+                element.classList.add(
+                    ...(attributes[item] as string).split(" ")
+                );
+            } else if (item.startsWith("data") && attributes) {
+                element.dataset[item.slice(5)] = attributes[item] as string;
+            } else if (item.startsWith("on")) {
+                event(
+                    element,
+                    item.slice(2).toLowerCase(),
+                    attributes[item] as (this: HTMLElement, ev: Event) => any
+                );
             }
         });
     }
@@ -172,6 +182,12 @@ export function event(
     if (rd) {
         redraw(rd);
     }
+}
+
+export function update(fn: () => any, component: Component) {
+    const r = fn.call(this);
+    redraw(component);
+    return r;
 }
 
 /**

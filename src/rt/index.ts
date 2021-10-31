@@ -3,7 +3,7 @@
 /**
  * A component is any function which can return an HTMLElement.
  */
-export type Component = () => HTMLElement;
+export type Component = () => HTMLElement | JSX.Element;
 
 // requestAnimationFrame polyfill
 export const requestAnimationFrame =
@@ -337,12 +337,12 @@ export const render = (
  * @param name Name of the component
  */
 export const hydrate = (i: Component) => {
-    const el: HTMLElement = i?.call(null);
+    const $el: HTMLElement = i?.call(null);
     emit(document.body, EventType.Initialized, {
         component: i.name.toLowerCase(),
     });
 
-    const kids: HTMLElement[] = Array.from(el.children).map(
+    const kids: HTMLElement[] = Array.from($el.children).map(
         el => el as HTMLElement
     );
 
@@ -363,18 +363,25 @@ export const hydrate = (i: Component) => {
     }
 
     if (
-        el instanceof HTMLAnchorElement &&
-        new URL(el.href).origin.startsWith(window.location.origin) == true
+        $el instanceof HTMLAnchorElement &&
+        new URL($el.href).origin.startsWith(window.location.origin) == true
     ) {
-        el.addEventListener("click", evt => {
-            if (el.dataset.bound) return;
-            el.dataset.bound = "true";
-            goTo(new URL((el as HTMLAnchorElement).href), evt);
+        $el.addEventListener("click", evt => {
+            if ($el.dataset.bound) return;
+            $el.dataset.bound = "true";
+            goTo(new URL(($el as HTMLAnchorElement).href), evt);
         });
     }
 
-    el.dataset.component = i.name.toLowerCase();
-    return el;
+    $el.dataset.component = i.name.toLowerCase();
+
+    const c = Components.get(i.name.toLowerCase());
+
+    if (c) {
+        Components.set(i.name.toLowerCase(), { fn: c.fn, el: $el });
+    }
+
+    return $el;
 };
 
 /**
