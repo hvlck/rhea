@@ -4,12 +4,12 @@ My preferred bundler is [esbuild](https://github.com/evanw/esbuild/).
 
 I've found the following setup to be rather headache-free:
 
-Run `yarn add -D esbuild`
+Run `yarn add -D esbuild` to add `esbuild` as a dev dependency.
 
 Create a file `build.ts`:
 
 ```typescript
-// ts
+// build.ts
 require("esbuild")
     .build({
         entryPoints: ["./src/index.tsx"],
@@ -20,19 +20,6 @@ require("esbuild")
         treeShaking: true,
         watch: true,
         keepNames: false,
-    })
-    .catch(() => process.exit(1));
-
-require("esbuild")
-    .build({
-        entryPoints: ["./src/index.css"],
-        bundle: true,
-        outfile: "dist/index.css",
-        minify: true,
-        sourcemap: true,
-        treeShaking: true,
-        watch: true,
-        keepNames: true,
     })
     .catch(() => process.exit(1));
 ```
