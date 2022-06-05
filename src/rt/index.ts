@@ -1,13 +1,16 @@
 // rhea runtime
 
+// todo: debug multiple rerenderings of components on load/initial render
+
 /**
  * A component is any function which can return an HTMLElement.
  */
-export type Component = () => HTMLElement | JSX.Element;
+export type Component = () => HTMLElement | JSX.HTMLElement;
 
 // requestAnimationFrame polyfill
 export const requestAnimationFrame =
     window.requestAnimationFrame ||
+    // @ts-expect-error
     window.webkitRequestAnimationFrame ||
     // @ts-expect-error
     window.mozRequestAnimationFrame ||
@@ -23,8 +26,7 @@ export const requestAnimationFrame =
  * The value is the latest element generated with the function, and the component function itself.
  * It is recommended that you do not modify this directly.
  */
-export const Components: Map<string, { fn: Component; el: HTMLElement }> =
-    new Map();
+export const Components: Map<string, { fn: Component; el: HTMLElement | JSX.Element }> = new Map();
 
 /**
  * Index is the index of routes (based on `window.location.pathname`) and the corresponding list of components that it consists of.
@@ -102,9 +104,9 @@ export const mount = <T extends { [key: string]: any }>(
 /**
  * removes all children from the given element
  */
-const removeAll = (el: HTMLCollection) => {
+const removeAll = (el: HTMLCollection | NodeList) => {
     requestAnimationFrame(() => {
-        Array.from(el).forEach(i => i.remove());
+        Array.from(el).forEach(i => i.parentElement?.removeChild(i));
     });
 };
 
@@ -116,9 +118,9 @@ const removeAll = (el: HTMLCollection) => {
  */
 export const navigate = (destination: URL | string) => {
     const old = window.location.pathname;
-    const p: string =
-        typeof destination == "string" ? destination : destination.pathname;
+    const p: string = typeof destination == "string" ? destination : destination.pathname;
     if (p != old) window.history.pushState("", "", p);
+    else if (p == old) return;
 
     emit(document.body, EventType.Navigation, {
         old,
@@ -220,9 +222,7 @@ export const prerender = (route: Route, set = false): DocumentFragment => {
             if (cmp) {
                 frag.appendChild(hydrate(cmp.fn));
             } else {
-                throw Error(
-                    `component ${i} is not registered in the component registry`
-                );
+                throw Error(`component ${i} is not registered in the component registry`);
             }
         });
     };
@@ -271,15 +271,21 @@ export const cache: Map<Route, DocumentFragment> = new Map();
  * @param prev Whether or not render is being called from a popstate event so that the DOM can be cleared. Do not set this parameter.
  */
 // todo: figure out a way to diff components on current page and next page, so that same components will not be removed
-export const render = (
-    options?: RenderOptions,
-    prev = true,
-    route = window.location.pathname
-) => {
-    // removes all previous components
-    if (prev) removeAll(document.body.children);
+export const render = (options?: RenderOptions, prev = false, route = window.location.pathname) => {
+    document.body.querySelectorAll<HTMLElement>("a[href]").forEach(i => {
+        i.addEventListener("click", evt => {
+            if (i.dataset.bound) return;
+            let href = (i as HTMLAnchorElement).href;
+            if (href.startsWith("#")) href = window.location.href + href;
 
-    // draws components to the screen
+            goTo(new URL(href), evt);
+        });
+    });
+
+    // removes all previous components
+    if (prev) removeAll(document.body.querySelectorAll("[data-component]"));
+
+    // draws components to screen
     const r = (components: Set<string>, route?: Route) => {
         let frag = new DocumentFragment();
 
@@ -288,11 +294,14 @@ export const render = (
             components.forEach(i => {
                 const cmp = Components.get(i);
                 if (cmp) {
-                    frag.appendChild(hydrate(cmp.fn));
-                } else {
-                    throw Error(
-                        `component ${i} is not registered in the component registry`
+                    const slot = document.body.querySelector(
+                        `slot[component="${cmp.fn.name.toLowerCase()}"]`
                     );
+
+                    if (slot) requestAnimationFrame(() => slot.appendChild(hydrate(cmp.fn)));
+                    else frag.appendChild(hydrate(cmp.fn));
+                } else {
+                    throw Error(`component ${i} is not registered`);
                 }
             });
         } else {
@@ -300,7 +309,7 @@ export const render = (
         }
 
         requestAnimationFrame(() => {
-            document.body.append(frag);
+            document.body.appendChild(frag);
             emit(document.body, EventType.GlobalRender);
         });
     };
@@ -314,6 +323,7 @@ export const render = (
         );
 
     const components = path(route);
+
     // no route found
     if (components == false && NotFound.size == 0) {
         throw Error(`${window.location.pathname} is not a registered route`);
@@ -337,27 +347,29 @@ export const render = (
  * @param name Name of the component
  */
 export const hydrate = (i: Component) => {
-    const $el: HTMLElement = i?.call(null);
+    const $el = i?.call(null) as HTMLElement;
     emit(document.body, EventType.Initialized, {
         component: i.name.toLowerCase(),
     });
 
-    const kids: HTMLElement[] = Array.from($el.children).map(
-        el => el as HTMLElement
-    );
+    const kids: HTMLElement[] = Array.from($el.children).map(el => el as HTMLElement);
 
     const hasLink = kids.filter(
         (kid: HTMLElement) =>
             kid instanceof HTMLAnchorElement &&
             kid.href &&
-            new URL(kid.href).origin.startsWith(window.location.origin) == true
+            (new URL(kid.href).origin.startsWith(window.location.origin) ||
+                kid.href.startsWith("#")) == true
     );
 
     if (hasLink.length >= 1) {
         hasLink.forEach(i =>
             i.addEventListener("click", evt => {
                 if (i.dataset.bound) return;
-                goTo(new URL((i as HTMLAnchorElement).href), evt);
+                let href = (i as HTMLAnchorElement).href;
+                if (href.startsWith("#")) href = window.location.href + href;
+
+                goTo(new URL(href), evt);
             })
         );
     }
@@ -369,7 +381,10 @@ export const hydrate = (i: Component) => {
         $el.addEventListener("click", evt => {
             if ($el.dataset.bound) return;
             $el.dataset.bound = "true";
-            goTo(new URL(($el as HTMLAnchorElement).href), evt);
+            let href = ($el as HTMLAnchorElement).href;
+            if (href.startsWith("#")) href = window.location.href + href;
+
+            goTo(new URL(href), evt);
         });
     }
 
@@ -377,9 +392,7 @@ export const hydrate = (i: Component) => {
 
     const c = Components.get(i.name.toLowerCase());
 
-    if (c) {
-        Components.set(i.name.toLowerCase(), { fn: c.fn, el: $el });
-    }
+    if (c) Components.set(i.name.toLowerCase(), { fn: c.fn, el: $el });
 
     return $el;
 };
@@ -402,7 +415,7 @@ export const redraw = (cmp: string | Component) => {
     if (cmpFunction) {
         const { el, fn } = cmpFunction;
 
-        el.replaceWith(hydrate(fn));
+        requestAnimationFrame(() => (el as HTMLElement).replaceWith(hydrate(fn)));
         emit(el as HTMLElement, EventType.Redraw);
     } else {
         throw Error(`component ${component} is not registered`);
