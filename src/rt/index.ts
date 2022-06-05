@@ -1,6 +1,7 @@
 // rhea runtime
 
 // todo: debug multiple rerenderings of components on load/initial render
+// todo: clean up code type assertions and codebase in general
 
 /**
  * A component is any function which can return an HTMLElement.
