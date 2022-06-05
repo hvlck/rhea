@@ -1,11 +1,5 @@
 // standard library utilities
-import {
-    Component,
-    goTo,
-    hydrate,
-    redraw,
-    requestAnimationFrame,
-} from "../rt/index";
+import { Component, goTo, hydrate, redraw, requestAnimationFrame } from "../rt/index";
 
 /**
  * scaffolding for easily creating an html element
@@ -15,9 +9,7 @@ import {
  */
 export function build<K extends keyof HTMLElementTagNameMap>(
     type: string | Component | K,
-    attributes?:
-        | { [key: string]: string | ((this: HTMLElement, ev: Event) => any) }
-        | string,
+    attributes?: { [key: string]: string | ((this: HTMLElement, ev: Event) => any) } | string,
     ...children: (HTMLElement | Element | string | Component)[]
 ) {
     let element: HTMLElement;
@@ -40,9 +32,7 @@ export function build<K extends keyof HTMLElementTagNameMap>(
             if (element.hasAttribute(item) || item in element) {
                 element.setAttribute(item, attributes[item] as string);
             } else if (item == "class") {
-                element.classList.add(
-                    ...(attributes[item] as string).split(" ")
-                );
+                element.classList.add(...(attributes[item] as string).split(" "));
             } else if (item.startsWith("data") && attributes) {
                 element.dataset[item.slice(5)] = attributes[item] as string;
             } else if (item.startsWith("on")) {
@@ -58,7 +48,7 @@ export function build<K extends keyof HTMLElementTagNameMap>(
     let kids: HTMLElement[] | Element[] | string[];
     if (children && typeof children[0] == "function") {
         kids = (children as Component[]).map((i: Component) => {
-            return i.call(null);
+            return i.call(null) as HTMLElement;
         });
     } else {
         kids = children as HTMLElement[] | Element[] | string[];
@@ -78,19 +68,12 @@ const NUMBER_OF_BATCHES = 25;
  * @param parent Parent element to append children to. If it is ommitted, the children are appended to `document.body`
  * @param children Elements to append to parent
  */
-export function append(
-    parent: HTMLElement,
-    ...children: (HTMLElement | Element | string)[]
-) {
+export function append(parent: HTMLElement, ...children: (HTMLElement | Element | string)[]) {
     const write = (kids: (HTMLElement | Element | string)[]) => {
         const frag = document.createDocumentFragment();
         kids.forEach((i: HTMLElement | Element | string) => {
             let el;
-            if (
-                i instanceof HTMLElement &&
-                i instanceof HTMLAnchorElement &&
-                i.href
-            ) {
+            if (i instanceof HTMLElement && i instanceof HTMLAnchorElement && i.href) {
                 const url = new URL(i.href);
                 if (url.origin.startsWith(window.location.origin) == true) {
                     i.addEventListener("click", evt => {
@@ -213,9 +196,7 @@ export function head(...el: HTMLHeadElement[]) {
             attr = `[${selector}="${i.getAttribute(selector)}"]`;
         }
 
-        document.head
-            .querySelector(`${i.nodeName.toLowerCase()}${attr}`)
-            ?.remove();
+        document.head.querySelector(`${i.nodeName.toLowerCase()}${attr}`)?.remove();
 
         document.head.appendChild(i);
     });
@@ -228,7 +209,7 @@ type CoercibleElementProperty = string | undefined | boolean | any;
 
 // batches of elements waiting to be updated
 const batches: Map<
-    HTMLElement | number,
+    HTMLElement | JSX.HTMLElement | number,
     { [key: string]: CoercibleElementProperty } | Function
 > = new Map();
 
@@ -242,7 +223,7 @@ let latest = 0;
  * @param props The properties and values of the element needing updating.
  */
 export function mutate(
-    element: HTMLElement | null,
+    element: HTMLElement | JSX.HTMLElement | null,
     props: { [key: string]: CoercibleElementProperty } | Function
 ) {
     let el = element == null ? latest++ : element;

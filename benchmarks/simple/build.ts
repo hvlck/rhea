@@ -6,6 +6,5 @@ require("esbuild")
         sourcemap: false,
         keepNames: true,
         minify: true,
-        target: ["chrome58", "firefox57", "safari11", "edge16"],
     })
     .catch(() => process.exit(1));

@@ -1,9 +1,11 @@
 # rhea
 
-`the micro rendering framework`
+`small rendering framework`
 
-+ [Tour](https://hvlck.github.io/rhea/tour/)
++ [Tour](https://noctiverse.github.io/rhea/tour/)
 + [Docs](./docs/index.md)
+
+Rhea is a small rendering framework I made for my own use. It's designed to be as performant as possible using the simplest and most basic browser APIs.
 
 ## Roadmap
 
